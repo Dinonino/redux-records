@@ -1,0 +1,34 @@
+{
+  "name": "redux-records",
+  "version": "0.0.1",
+  "description": "Lightweight yet powerful redux solution for data management",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ivanvarga/redux-records.git"
+  },
+  "keywords": [
+    "react",
+    "reactjs",
+    "redux",
+    "data",
+    "records",
+    "redux-records"
+  ],
+  "author": "Ivan Varga",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ivanvarga/redux-records/issues"
+  },
+  "homepage": "https://github.com/ivanvarga/redux-records#readme",
+  "devDependencies": {
+    "eslint": "^4.16.0",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-react": "^7.5.1"
+  }
+}
