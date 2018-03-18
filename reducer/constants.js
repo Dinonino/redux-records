@@ -1,12 +1,14 @@
 export const STORE_PATH = {
   DATA: 'ENTITIES',
   STATE: 'STATE',
+  ACTIONS: 'ACTIONS',
 };
 
 export const ENTITY_STATE = {
   SYNCED: 'SYNCED',
   SYNC_FAILED: 'SYNC_FAILED',
   SYNCING: 'SYNCING',
+  OUT_OF_SYNC: 'OUT_OF_SYNC'
 };
 
 export const ACTION = {
