@@ -1,7 +1,9 @@
 export const STORE_PATH = {
+  KEY:'KEY',
   DATA: 'ENTITIES',
   STATE: 'STATE',
   ACTIONS: 'ACTIONS',
+  ENTITIES_STATE: 'ENTITIES_STATE'
 };
 
 export const ENTITY_STATE = {
@@ -15,3 +17,5 @@ export const ACTION = {
   DELETE: 'DELETE',
   UPDATE: 'UPDATE',
 };
+
+export const STORE_KEY = 'RRECORDS';
