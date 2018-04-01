@@ -30,7 +30,9 @@ const handleAction = (options, entityKey, dispatch) => (payload, apiKey, actionS
 }
 
 let keys = null;
-const handleUpdate = (previousId, key) => payload => 
+const handleUpdateSuccess = (previousId, updateSucceededAction) => payload => updateSucceededAction(previousId, updateSucceededAction);
+
+
 const apiMiddleware = options => ({ dispatch, getState }) => next => action => {
   const { type, payload } = action;
   if (type.startsWith(constants.ID)) {
@@ -67,7 +69,7 @@ const apiMiddleware = options => ({ dispatch, getState }) => next => action => {
           case ACTION.UPDATE:
             handler("update", result => {
 
-            }, actions.updateSucceededAction, actions.updateFailedAction, payload);
+            }, handleUpdateSuccess(,actions.updateSucceededAction), actions.updateFailedAction, payload);
             break;
           default:
             break;

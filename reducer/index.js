@@ -34,9 +34,10 @@ const reducerFactory = ({ ID, key }) => {
     },
   };
   return (state = initialState, { type, payload }) => {
-    const { [key]: id = '', ...data } = payload || {};
-    const entity = state[STORE_PATH.DATA].find(el => el[key] === id);
-    const entityState = state[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][id];
+    const { entity: { [key]: id = '', ...data } = {}, previousId } = payload || {};
+    const entityId = previousId || id;
+    const entity = state[STORE_PATH.DATA].find(el => el[key] === entityId);
+    const entityState = state[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][entityId];
     const globalState = state[STORE_PATH.STATE];
     switch (type) {
       case CONSTANTS.DELETE:
@@ -62,7 +63,8 @@ const reducerFactory = ({ ID, key }) => {
         entityState.SYNC_MSG = '';
         entityState.ACTIONS = [];
         entityState.HISTORY_INDEX = undefined;
-        return state;
+        if ()
+          return state;
       case CONSTANTS.LOAD:
         globalState.STATE = ENTITY_STATE.SYNCING;
         return state;
@@ -99,6 +101,11 @@ const reducerFactory = ({ ID, key }) => {
         entityState.SYNC_MSG = '';
         entityState.ACTIONS = [];
         entityState.HISTORY_INDEX = undefined;
+        Object.assign(entity, { id, ...data });
+        if (previousId !== id) {
+          state[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][id] = entityState;
+          delete STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][previousId];
+        }
       case CONSTANTS.REDO:
         if (entityState.ACTIONS.length && entityState.ACTIONS.length > (entityState.HISTORY_INDEX + 1)) {
           state[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity === el);
