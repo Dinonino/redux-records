@@ -131,4 +131,10 @@ const reducerFactory = ({ ID, key }) => {
     }
   };
 };
-export default reducerFactory;
+export const reducersFactory = config =>
+  combineReducers(Object.entries(config).reduce((acc, [ID, key]) => {
+    acc[ID] = reducerFactory({ ID, key });
+    return acc;
+  }, {}));
+
+export default reducersFactory;
