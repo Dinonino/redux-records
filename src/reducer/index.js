@@ -50,7 +50,7 @@ const reducerFactory = ({ ID, key }) => {
             entityState.ACTIONS.splice(state.HISTORY_INDEX);
           }
 
-          entityState.ACTIONS.push({ ACTION: ACTION.DELETE, PAYLOAD = payload, SNAPSHOT: entity });
+          entityState.ACTIONS.push({ ACTION: ACTION.DELETE, PAYLOAD: payload, SNAPSHOT: entity });
           entityState.HISTORY_INDEX = state.HISTORY.length - 1;
         }
         return state;
@@ -63,8 +63,6 @@ const reducerFactory = ({ ID, key }) => {
         entityState.SYNC_MSG = '';
         entityState.ACTIONS = [];
         entityState.HISTORY_INDEX = undefined;
-        if ()
-          return state;
       case CONSTANTS.LOAD:
         globalState.STATE = ENTITY_STATE.SYNCING;
         return state;
@@ -88,7 +86,7 @@ const reducerFactory = ({ ID, key }) => {
             entityState.ACTIONS.splice(state.HISTORY_INDEX);
           }
 
-          entityState.ACTIONS.push({ ACTION: ACTION.DELETE, PAYLOAD = payload, SNAPSHOT: entity });
+          entityState.ACTIONS.push({ ACTION: ACTION.DELETE, PAYLOAD: payload, SNAPSHOT: entity });
           entityState.HISTORY_INDEX = state.HISTORY.length - 1;
         }
         return state;
@@ -104,7 +102,7 @@ const reducerFactory = ({ ID, key }) => {
         Object.assign(entity, { id, ...data });
         if (previousId !== id) {
           state[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][id] = entityState;
-          delete STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][previousId];
+          delete state[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][previousId];
         }
       case CONSTANTS.REDO:
         if (entityState.ACTIONS.length && entityState.ACTIONS.length > (entityState.HISTORY_INDEX + 1)) {

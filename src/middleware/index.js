@@ -69,7 +69,7 @@ const apiMiddleware = options => ({ dispatch, getState }) => next => action => {
           case ACTION.UPDATE:
             handler("update", result => {
 
-            }, handleUpdateSuccess(,actions.updateSucceededAction), actions.updateFailedAction, payload);
+            }, handleUpdateSuccess(id ,actions.updateSucceededAction), actions.updateFailedAction, payload);
             break;
           default:
             break;

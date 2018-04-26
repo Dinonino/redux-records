@@ -4,5 +4,5 @@ export const dataSelector = (state, id) => {
 }
 
 export const stateSelector = (state, id) => {
-    const data = state[id][[STORE_PATH.STATE];
+    const data = state[id][STORE_PATH.STATE];
 } 
