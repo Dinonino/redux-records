@@ -1,5 +1,5 @@
 import { STORE_PATH, ACTION, ENTITY_STATE } from './constants';
-import constantsFactory from '../actions/constants';
+import { constantsFactory, CONSTANTS_REGEX } from '../actions';
 
 
 const mergeEntities = (previousEntities, newEntities, id) => {
@@ -129,10 +129,19 @@ const reducerFactory = ({ ID, key }) => {
     }
   };
 };
-export const reducersFactory = config =>
-  combineReducers(Object.entries(config).reduce((acc, [ID, key]) => {
-    acc[ID] = reducerFactory({ ID, key });
-    return acc;
-  }, {}));
+
+export const reducersFactory = () => {
+  const dataState = {};
+  return (state = {}, action) => {
+    const { type } = action;
+    if (type.startsWith(CONSTANTS_REGEX.ID)) {
+ 
+    } else {
+      return state;
+    }
+  };
+};
 
 export default reducersFactory;
+
+export { STORE_PATH, ACTION, ENTITY_STATE }; 

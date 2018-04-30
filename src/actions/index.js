@@ -1,7 +1,7 @@
-import constantFactory from './constants';
+import constantsFactory, * as CONSTANTS_REGEX from './constants';
 
-const actionsFactory = (id) => {
-  const constants = constantFactory(id);
+const actionsFactory = ({ id, key }) => {
+  const constants = constantsFactory(id);
 
   const loadAction = options => ({ type: constants.LOAD, payload: options });
   const loadFailedAction = error => ({ type: constants.LOAD_FAILED, payload: error });
@@ -19,6 +19,9 @@ const actionsFactory = (id) => {
 
   const syncAllAction = options => ({ type: constants.SYNC_ALL });
 
+  const initializeStore = () => ({ type: constants.INITIALIZE, payload: { key } });
+  const destructStore = () => ({ type: constants.DESTRUCT })
+
   return {
     loadAction,
     loadFailedAction,
@@ -31,7 +34,11 @@ const actionsFactory = (id) => {
     deleteSyncAction,
     deleteFailedAction,
     deleteSucceededAction,
+    initializeStore,
+    destructStore,
   };
 };
 
 export default actionsFactory;
+
+export { CONSTANTS_REGEX, constantsFactory };

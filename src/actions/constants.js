@@ -18,6 +18,8 @@ export const SYNC_ALL = new RegExp(`${escapeRegExp(ID)}/(\\w+)/SYNC_ALL`)
 export const UNDO = new RegExp(`${escapeRegExp(ID)}/(\\w+)/UNDO`);
 export const REDO = new RegExp(`${escapeRegExp(ID)}/(\\w+)/REDO`);
 export const DISCARD = new RegExp(`${escapeRegExp(ID)}/(\\w+)/DISCARD`);
+export const INITIALIZE = new RegExp(`${escapeRegExp(ID)}/(\\w+)/INITIALIZE`);
+export const DESTRUCT = new RegExp(`${escapeRegExp(ID)}/(\\w+)/DESTRUCT`);
 
 export const DATA_ID_EXP = new RegExp(`${escapeRegExp(ID)}/(\\w+)/`)
 
@@ -38,6 +40,8 @@ const constantsFactory = DATA_ID => ({
   UNDO: `${ID}/${DATA_ID}/UNDO`,
   REDO: `${ID}/${DATA_ID}/REDO`,
   DISCARD: `${ID}/${DATA_ID}/DISCARD`,
+  INITIALIZE: `${ID}/${DATA_ID}/INITIALIZE`,
+  DESTRUCT: `${ID}/${DATA_ID}/DESTRUCT`,
 });
 
 export default constantsFactory;
