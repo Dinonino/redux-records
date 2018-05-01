@@ -19,7 +19,7 @@ const actionsFactory = ({ id, key }) => {
 
   const syncAllAction = options => ({ type: constants.SYNC_ALL });
 
-  const initializeStore = () => ({ type: constants.INITIALIZE, payload: { key } });
+  const initializeStore = key => ({ type: constants.INITIALIZE, payload: { key } });
   const destructStore = () => ({ type: constants.DESTRUCT })
 
   return {

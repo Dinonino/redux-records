@@ -133,12 +133,18 @@ const reducerFactory = ({ ID, key }) => {
 export const reducersFactory = () => {
   const dataState = {};
   return (state = {}, action) => {
-    const { type } = action;
+    const { type, payload: { key } = {} } = action;
     if (type.startsWith(CONSTANTS_REGEX.ID)) {
- 
-    } else {
-      return state;
+      const ID = constants.DATA_ID_EXP.exec(type)[0]
+      if (CONSTANTS_REGEX.INITIALIZE.test(type) && !dataState[id]) {
+        dataState[id] = reducerFactory({ ID, key })
+      } else if (CONSTANTS_REGEX.DESTRUCT.test(type)) {
+        delete dataState[id];
+      } else {
+        state[id] = dataState[id](state[id], action);
+      }
     }
+    return state;
   };
 };
 
