@@ -16,7 +16,7 @@ const dataContainer = ({ dataKey = STORE_KEY, key, ID, destroyOnUnmount = false 
         }),
             actionsFactory(key)
         ),
-        DataContainerHOC({ ID, key, destroyOnUnMount }),
+        DataContainerHOC({ ID, key, destroyOnUnmount }),
     )
 const DataContainerHOC = ({ destroyOnUnmount, ID, key }) => WrappedComponent => {
     return class DataContainer extends Component {
