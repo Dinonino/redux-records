@@ -1,7 +1,7 @@
 import constantsFactory, * as CONSTANTS_REGEX from './constants';
 
-const actionsFactory = ({ id, key }) => {
-  const constants = constantsFactory(id);
+const actionsFactory = (dataKey) => {
+  const constants = constantsFactory(dataKey);
 
   const loadAction = options => ({ type: constants.LOAD, payload: options });
   const loadFailedAction = error => ({ type: constants.LOAD_FAILED, payload: error });
@@ -13,14 +13,14 @@ const actionsFactory = ({ id, key }) => {
   const updateSucceededAction = (previousId, entity) => ({ type: constants.UPDATE_SUCCEEDED, payload: { previousId, entity } });
 
   const deleteAction = entity => ({ type: constants.DELETE, payload: { entity } });
-  const deleteSyncAction = entity => ({ type: constants.DELETE_SYNC, payload: { entity } })
+  const deleteSyncAction = entity => ({ type: constants.DELETE_SYNC, payload: { entity } });
   const deleteFailedAction = error => ({ type: constants.DELETE_FAILED, payload: error });
   const deleteSucceededAction = () => ({ type: constants.DELETE_SUCCEEDED });
 
-  const syncAllAction = options => ({ type: constants.SYNC_ALL });
+  const syncAllAction = () => ({ type: constants.SYNC_ALL });
 
-  const initializeStore = key => ({ type: constants.INITIALIZE, payload: { key } });
-  const destructStore = () => ({ type: constants.DESTRUCT })
+  const initializeStore = dataID => ({ type: constants.INITIALIZE, payload: { dataID } });
+  const destructStore = () => ({ type: constants.DESTRUCT });
 
   return {
     loadAction,
@@ -34,6 +34,7 @@ const actionsFactory = ({ id, key }) => {
     deleteSyncAction,
     deleteFailedAction,
     deleteSucceededAction,
+    syncAllAction,
     initializeStore,
     destructStore,
   };

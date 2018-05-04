@@ -24,19 +24,19 @@ const mergeEntities = (previousEntities, newEntities, id) => {
 };
 
 
-const reducerFactory = ({ ID, key }) => {
+const reducerFactory = ({ ID, dataID }) => {
   const CONSTANTS = constantsFactory(ID);
   const initialState = {
-    [STORE_PATH.KEY]: key,
+    [STORE_PATH.KEY]: ID,
     [STORE_PATH.DATA]: [],
     [STORE_PATH.STATE]: {
-      [STORE_PATH.ENTITIES_STATE]: []
+      [STORE_PATH.ENTITIES_STATE]: [],
     },
   };
   return (state = initialState, { type, payload }) => {
-    const { entity: { [key]: id = '', ...data } = {}, previousId } = payload || {};
+    const { entity: { [dataID]: id = '', ...data } = {}, previousId } = payload || {};
     const entityId = previousId || id;
-    const entity = state[STORE_PATH.DATA].find(el => el[key] === entityId);
+    const entity = state[STORE_PATH.DATA].find(el => el[dataID] === entityId);
     const entityState = state[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][entityId];
     const globalState = state[STORE_PATH.STATE];
     switch (type) {
@@ -63,6 +63,7 @@ const reducerFactory = ({ ID, key }) => {
         entityState.SYNC_MSG = '';
         entityState.ACTIONS = [];
         entityState.HISTORY_INDEX = undefined;
+        break;
       case CONSTANTS.LOAD:
         globalState.STATE = ENTITY_STATE.SYNCING;
         return state;
@@ -104,6 +105,7 @@ const reducerFactory = ({ ID, key }) => {
           state[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][id] = entityState;
           delete state[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][previousId];
         }
+        break;
       case CONSTANTS.REDO:
         if (entityState.ACTIONS.length && entityState.ACTIONS.length > (entityState.HISTORY_INDEX + 1)) {
           state[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity === el);
@@ -133,15 +135,17 @@ const reducerFactory = ({ ID, key }) => {
 export const reducersFactory = () => {
   const dataState = {};
   return (state = {}, action) => {
-    const { type, payload: { key } = {} } = action;
+    const { type, payload: { dataID } = {} } = action;
     if (type.startsWith(CONSTANTS_REGEX.ID)) {
-      const ID = constants.DATA_ID_EXP.exec(type)[0]
-      if (CONSTANTS_REGEX.INITIALIZE.test(type) && !dataState[id]) {
-        dataState[id] = reducerFactory({ ID, key })
+      const ID = CONSTANTS_REGEX.DATA_ID_EXP.exec(type)[1];
+      if (CONSTANTS_REGEX.INITIALIZE.test(type) && !dataState[ID]) {
+        dataState[ID] = reducerFactory({ ID, dataID });
+        state[ID] = dataState[ID](state[ID], action);
       } else if (CONSTANTS_REGEX.DESTRUCT.test(type)) {
-        delete dataState[id];
+        delete dataState[ID];
+        delete state[ID];
       } else {
-        state[id] = dataState[id](state[id], action);
+        state[ID] = dataState[ID](state[ID], action);
       }
     }
     return state;
@@ -150,4 +154,4 @@ export const reducersFactory = () => {
 
 export default reducersFactory;
 
-export { STORE_PATH, ACTION, ENTITY_STATE }; 
+export { STORE_PATH, ACTION, ENTITY_STATE };

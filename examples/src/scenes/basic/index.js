@@ -1,7 +1,6 @@
 import React from 'react';
 import { dataContainer } from 'redux-records';
-const basicScreen = (props) => {
-    return (<span>Basic Screen</span>);
-}
 
-export default dataContainer({ key: 'USERS', ID: 'id' })(basicScreen);
+const basicScreen = () => (<span>Basic Screen</span>);
+
+export default dataContainer({ dataKey: 'USERS', dataID: 'id' })(basicScreen);
