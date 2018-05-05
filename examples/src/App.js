@@ -1,7 +1,7 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
-import { Container, Divider, Dropdown, Grid, Header, Image, List, Menu, Segment } from 'semantic-ui-react';
+import { Container, Image, List, Menu, Segment } from 'semantic-ui-react';
 import Basic from './scenes/basic';
 import Advanced from './scenes/advanced';
 import logo from './logo.svg';
