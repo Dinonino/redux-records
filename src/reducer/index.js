@@ -1,6 +1,17 @@
 import { STORE_PATH, ACTION, ENTITY_STATE, STORE_KEY } from './constants';
 import { constantsFactory, CONSTANTS_REGEX } from '../actions';
 
+/**
+ * Based on https://github.com/Steve-Fenton/TypeScriptUtilities
+ * implementation of GUID
+ * @returns {string} GUID string
+ */
+const getGUID = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+  let r = Math.random() * 16 | 0,
+    v = c === 'x' ? r : (r & 0x3 | 0x8);
+  return v.toString(16);
+});
+
 
 const mergeEntities = (previousEntities, newEntities, id) => {
   const retValue = [];
@@ -30,14 +41,18 @@ const reducerFactory = ({ ID, dataID }) => {
     [STORE_PATH.KEY]: ID,
     [STORE_PATH.DATA]: [],
     [STORE_PATH.STATE]: {
-      [STORE_PATH.ENTITIES_STATE]: [],
+      [STORE_PATH.ENTITIES_STATE]: {},
     },
   };
   return (state = initialState, { type, payload }) => {
     const { entity: { [dataID]: id = '', ...data } = {}, previousId } = payload || {};
-    const entityId = previousId || id;
+    const entityId = previousId || id || getGUID();
     const entity = state[STORE_PATH.DATA].find(el => el[dataID] === entityId);
+    if (Object.keys(data).length && !state[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][entityId]) {
+      state[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][entityId] = { ACTIONS: [] };
+    }
     const entityState = state[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][entityId];
+
     const globalState = state[STORE_PATH.STATE];
     switch (type) {
       case CONSTANTS.DELETE:
@@ -51,7 +66,7 @@ const reducerFactory = ({ ID, dataID }) => {
           }
 
           entityState.ACTIONS.push({ ACTION: ACTION.DELETE, PAYLOAD: payload, SNAPSHOT: entity });
-          entityState.HISTORY_INDEX = state.HISTORY.length - 1;
+          entityState.HISTORY_INDEX = state.ACTIONS.length - 1;
         }
         return state;
       case CONSTANTS.DELETE_FAILED:
@@ -78,17 +93,17 @@ const reducerFactory = ({ ID, dataID }) => {
         return state;
       case CONSTANTS.UPDATE:
       case CONSTANTS.UPDATE_SYNC:
-        if (data) {
+        if (Object.keys(data).length) {
           state[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity === el);
-          state[STORE_PATH.DATA].push(payload);
+          state[STORE_PATH.DATA].push({ ...data, [dataID]: entityId });
           entityState.STATE = type === CONSTANTS.UPDATE ? ENTITY_STATE.OUT_OF_SYNC : ENTITY_STATE.SYNCING;
 
           if (entityState.ACTIONS.length && entityState.ACTIONS.length > (entityState.HISTORY_INDEX + 1)) {
-            entityState.ACTIONS.splice(state.HISTORY_INDEX);
+            entityState.ACTIONS.splice(entityState.HISTORY_INDEX);
           }
 
           entityState.ACTIONS.push({ ACTION: ACTION.DELETE, PAYLOAD: payload, SNAPSHOT: entity });
-          entityState.HISTORY_INDEX = state.HISTORY.length - 1;
+          entityState.HISTORY_INDEX = entityState.ACTIONS.length - 1;
         }
         return state;
       case CONSTANTS.UPDATE_FAILED:
