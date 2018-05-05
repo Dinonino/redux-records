@@ -1,4 +1,4 @@
-import { STORE_PATH, ACTION, ENTITY_STATE } from './constants';
+import { STORE_PATH, ACTION, ENTITY_STATE, STORE_KEY } from './constants';
 import { constantsFactory, CONSTANTS_REGEX } from '../actions';
 
 
@@ -154,4 +154,4 @@ export const reducersFactory = () => {
 
 export default reducersFactory;
 
-export { STORE_PATH, ACTION, ENTITY_STATE };
+export { STORE_PATH, ACTION, ENTITY_STATE, STORE_KEY };

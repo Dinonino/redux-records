@@ -1,45 +1,61 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { Provider } from 'react-redux';
-import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
+import { Container, Divider, Dropdown, Grid, Header, Image, List, Menu, Segment } from 'semantic-ui-react';
 import Basic from './scenes/basic';
 import Advanced from './scenes/advanced';
 import logo from './logo.svg';
 import './App.css';
 import store from './store';
 
-class App extends Component {
-  render() {
-    return (
-      <Provider store={store}>
+const App = () => (
+  <Provider store={store}>
 
-        <Router>
-          <div className="App">
-            <header className="App-header">
-              <img src={logo} className="App-logo" alt="logo" />
-              <h1 className="App-title">Welcome to React</h1>
-            </header>
-            <p className="App-intro">
-              To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
+    <Router>
+      <div>
+        <Menu fixed="top" inverted>
+          <Container>
+            <Menu.Item as="a" header>
+              <Image
+                size="mini"
+                src={logo}
+                style={{ marginRight: '1.5em' }}
+              />
+              Redux Records examples
+            </Menu.Item>
+            <Menu.Item as="a"><Link to="/">Home</Link></Menu.Item>
+            <Menu.Item as="a"><Link to="/advanced">Advanced</Link></Menu.Item>
+          </Container>
+        </Menu>
 
-            <div>
-              <ul>
-                <li>
-                  <Link to="/">Home</Link>
-                </li>
-                <li>
-                  <Link to="/advanced">Advanced</Link>
-                </li>
-              </ul>
-              <hr />
-              <Route exact path="/advanced" component={Advanced} />
-              <Route exact path="/" component={Basic} />
-            </div>
-          </div>
-        </Router>
-      </Provider>
-    );
-  }
-}
+        <Container text style={{ marginTop: '7em' }}>
+          <Route exact path="/advanced" component={Advanced} />
+          <Route exact path="/" component={Basic} />
+        </Container>
+
+        <Segment
+          inverted
+          vertical
+          style={{ margin: '5em 0em 0em', padding: '5em 0em' }}
+        >
+          <Container textAlign="center">
+            <Image
+              centered
+              size="mini"
+              src={logo}
+            />
+            <List horizontal inverted divided link>
+              <List.Item as="a" href="#">Site Map</List.Item>
+              <List.Item as="a" href="#">Contact Us</List.Item>
+              <List.Item as="a" href="#">Terms and Conditions</List.Item>
+              <List.Item as="a" href="#">Privacy Policy</List.Item>
+            </List>
+          </Container>
+        </Segment>
+      </div>
+    </Router>
+  </Provider>
+);
+
 
 export default App;
