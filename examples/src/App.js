@@ -21,7 +21,7 @@ const App = () => (
                 src={logo}
                 style={{ marginRight: '1.5em' }}
               />
-              Redux Records examples
+              RxRec examples
             </Menu.Item>
             <Menu.Item as="a"><Link to="/">Home</Link></Menu.Item>
             <Menu.Item as="a"><Link to="/advanced">Advanced</Link></Menu.Item>
