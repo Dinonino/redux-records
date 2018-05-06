@@ -66,7 +66,7 @@ const reducerFactory = ({ ID, dataID }) => {
           }
 
           entityState.ACTIONS.push({ ACTION: ACTION.DELETE, PAYLOAD: payload, SNAPSHOT: entity });
-          entityState.HISTORY_INDEX = state.ACTIONS.length - 1;
+          entityState.HISTORY_INDEX = entityState.ACTIONS.length - 1;
         }
         return state;
       case CONSTANTS.DELETE_FAILED:
@@ -102,7 +102,7 @@ const reducerFactory = ({ ID, dataID }) => {
             entityState.ACTIONS.splice(entityState.HISTORY_INDEX);
           }
 
-          entityState.ACTIONS.push({ ACTION: ACTION.DELETE, PAYLOAD: payload, SNAPSHOT: entity });
+          entityState.ACTIONS.push({ ACTION: ACTION.UPDATE, PAYLOAD: payload, SNAPSHOT: entity });
           entityState.HISTORY_INDEX = entityState.ACTIONS.length - 1;
         }
         return state;

@@ -1,17 +1,23 @@
 import React from 'react';
 import { dataContainer } from 'redux-records';
-import { Table } from 'semantic-ui-react';
+import { Table, Button } from 'semantic-ui-react';
 
 const listScreen = (props) => {
-  const { data } = props;
+  const { data = [], deleteAction } = props;
   return (
     <Table attached>
       <Table.Header>
         <Table.HeaderCell>First Name</Table.HeaderCell>
         <Table.HeaderCell>Last Name</Table.HeaderCell>
+        <Table.HeaderCell />
       </Table.Header>
       <Table.Body>
-        {data.map(({ firstName, lastName }) => (<Table.Row> <Table.Cell>{firstName} </Table.Cell><Table.Cell>{lastName}</Table.Cell></Table.Row>))}
+        {data.map(({ firstName, lastName, ...entity }) => (
+          <Table.Row>
+            <Table.Cell>{firstName} </Table.Cell>
+            <Table.Cell>{lastName}</Table.Cell>
+            <Table.Cell><Button size="small" onClick={() => deleteAction(entity)}>Delete</Button></Table.Cell>
+          </Table.Row>))}
       </Table.Body>
     </Table>
   );
