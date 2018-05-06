@@ -58,7 +58,7 @@ const reducerFactory = ({ ID, dataID }) => {
       case CONSTANTS.DELETE:
       case CONSTANTS.DELETE_SYNC:
         if (entityState.ACTIONS[entityState.HISTORY_INDEX].ACTION !== ACTION.DELETE) {
-          state[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity === el);
+          state[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity !== el);
           entityState.STATE = type === CONSTANTS.DELETE ? ENTITY_STATE.OUT_OF_SYNC : ENTITY_STATE.SYNCING;
 
           if (entityState.ACTIONS.length && entityState.ACTIONS.length > (entityState.HISTORY_INDEX + 1)) {
@@ -94,7 +94,7 @@ const reducerFactory = ({ ID, dataID }) => {
       case CONSTANTS.UPDATE:
       case CONSTANTS.UPDATE_SYNC:
         if (Object.keys(data).length) {
-          state[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity === el);
+          state[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity !== el);
           state[STORE_PATH.DATA].push({ ...data, [dataID]: entityId });
           entityState.STATE = type === CONSTANTS.UPDATE ? ENTITY_STATE.OUT_OF_SYNC : ENTITY_STATE.SYNCING;
 
@@ -123,14 +123,14 @@ const reducerFactory = ({ ID, dataID }) => {
         break;
       case CONSTANTS.REDO:
         if (entityState.ACTIONS.length && entityState.ACTIONS.length > (entityState.HISTORY_INDEX + 1)) {
-          state[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity === el);
+          state[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity !== el);
           entityState.HISTORY_INDEX += 1;
           state[STORE_PATH.DATA].push(entityState.ACTIONS[entityState.HISTORY_INDEX].SNAPSHOT);
         }
         return state;
       case CONSTANTS.UNDO:
         if (entityState.ACTIONS.length && entityState.HISTORY_INDEX > 0) {
-          state[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity === el);
+          state[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity !== el);
           entityState.HISTORY_INDEX -= 1;
           state[STORE_PATH.DATA].push(entityState.ACTIONS[entityState.HISTORY_INDEX].SNAPSHOT);
         }

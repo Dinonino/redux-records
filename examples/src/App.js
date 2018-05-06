@@ -3,6 +3,7 @@ import { Provider } from 'react-redux';
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import { Container, Image, List, Menu, Segment } from 'semantic-ui-react';
 import Basic from './scenes/basic';
+import ListComp from './scenes/basic/list';
 import Advanced from './scenes/advanced';
 import logo from './logo.svg';
 import './App.css';
@@ -24,11 +25,13 @@ const App = () => (
               RxRec examples
             </Menu.Item>
             <Menu.Item as="a"><Link to="/">Home</Link></Menu.Item>
+            <Menu.Item as="a"><Link to="/list">List</Link></Menu.Item>
             <Menu.Item as="a"><Link to="/advanced">Advanced</Link></Menu.Item>
           </Container>
         </Menu>
 
         <Container text style={{ marginTop: '7em' }}>
+          <Route exact path="/list" component={ListComp} />
           <Route exact path="/advanced" component={Advanced} />
           <Route exact path="/" component={Basic} />
         </Container>
