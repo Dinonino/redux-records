@@ -17,6 +17,11 @@ const actionsFactory = (dataKey) => {
   const deleteFailedAction = error => ({ type: constants.DELETE_FAILED, payload: error });
   const deleteSucceededAction = () => ({ type: constants.DELETE_SUCCEEDED });
 
+  const undoAction = entity => ({ type: constants.UNDO, payload: { entity } });
+  const redoAction = entity => ({ type: constants.REDO, payload: { entity } });
+  const discardAction = entity => ({ type: constants.DISCARD, payload: { entity } });
+
+
   const syncAllAction = () => ({ type: constants.SYNC_ALL });
 
   const initializeStore = dataID => ({ type: constants.INITIALIZE, payload: { dataID } });
@@ -34,6 +39,9 @@ const actionsFactory = (dataKey) => {
     deleteSyncAction,
     deleteFailedAction,
     deleteSucceededAction,
+    undoAction,
+    redoAction,
+    discardAction,
     syncAllAction,
     initializeStore,
     destructStore,

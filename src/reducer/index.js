@@ -65,8 +65,10 @@ const reducerFactory = ({ ID, dataID }) => {
           if (entityState.ACTIONS.length && entityState.ACTIONS.length > (entityState.HISTORY_INDEX + 1)) {
             entityState.ACTIONS.splice(state.HISTORY_INDEX);
           }
-
-          entityState.ACTIONS.push({ ACTION: ACTION.DELETE, PAYLOAD: payload, SNAPSHOT: entity });
+          if (entityState.ACTIONS.length) {
+            entityState.ACTIONS[entityState.HISTORY_INDEX].SNAPSHOT = entity;
+          }
+          entityState.ACTIONS.push({ ACTION: ACTION.DELETE, PAYLOAD: payload });
           entityState.HISTORY_INDEX = entityState.ACTIONS.length - 1;
         }
         return newState;
@@ -102,8 +104,10 @@ const reducerFactory = ({ ID, dataID }) => {
           if (entityState.ACTIONS.length && entityState.ACTIONS.length > (entityState.HISTORY_INDEX + 1)) {
             entityState.ACTIONS.splice(entityState.HISTORY_INDEX);
           }
-
-          entityState.ACTIONS.push({ ACTION: ACTION.UPDATE, PAYLOAD: payload, SNAPSHOT: entity });
+          if (entityState.ACTIONS.length) {
+            entityState.ACTIONS[entityState.HISTORY_INDEX].SNAPSHOT = entity;
+          }
+          entityState.ACTIONS.push({ ACTION: ACTION.UPDATE, PAYLOAD: payload });
           entityState.HISTORY_INDEX = entityState.ACTIONS.length - 1;
         }
         return newState;
@@ -132,13 +136,18 @@ const reducerFactory = ({ ID, dataID }) => {
       case CONSTANTS.UNDO:
         if (entityState.ACTIONS.length && entityState.HISTORY_INDEX > 0) {
           newState[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity !== el);
+          entityState.ACTIONS[entityState.HISTORY_INDEX].SNAPSHOT = entity;
           entityState.HISTORY_INDEX -= 1;
           newState[STORE_PATH.DATA].push(entityState.ACTIONS[entityState.HISTORY_INDEX].SNAPSHOT);
         }
         return newState;
       case CONSTANTS.DISCARD:
-        entityState.ACTIONS = [];
-        entityState.HISTORY_INDEX = undefined;
+        if (entityState.ACTIONS.length && entityState.HISTORY_INDEX > 0) {
+          newState[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity !== el);
+          newState[STORE_PATH.DATA].push(entityState.ACTIONS[0].SNAPSHOT);
+          entityState.ACTIONS = [];
+          entityState.HISTORY_INDEX = undefined;
+        }
         return newState;
       case CONSTANTS.SYNC_ALL:
         return state;
