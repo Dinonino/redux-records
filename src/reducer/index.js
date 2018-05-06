@@ -45,11 +45,12 @@ const reducerFactory = ({ ID, dataID }) => {
     },
   };
   return (state = initialState, { type, payload }) => {
+    const newState = { ...state };
     const { entity: { [dataID]: id = '', ...data } = {}, previousId } = payload || {};
     const entityId = previousId || id || getGUID();
     const entity = state[STORE_PATH.DATA].find(el => el[dataID] === entityId);
     if (Object.keys(data).length && !state[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][entityId]) {
-      state[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][entityId] = { ACTIONS: [] };
+      newState[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][entityId] = { ACTIONS: [] };
     }
     const entityState = state[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][entityId];
 
@@ -58,7 +59,7 @@ const reducerFactory = ({ ID, dataID }) => {
       case CONSTANTS.DELETE:
       case CONSTANTS.DELETE_SYNC:
         if (entityState.ACTIONS[entityState.HISTORY_INDEX].ACTION !== ACTION.DELETE) {
-          state[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity !== el);
+          newState[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity !== el);
           entityState.STATE = type === CONSTANTS.DELETE ? ENTITY_STATE.OUT_OF_SYNC : ENTITY_STATE.SYNCING;
 
           if (entityState.ACTIONS.length && entityState.ACTIONS.length > (entityState.HISTORY_INDEX + 1)) {
@@ -68,11 +69,11 @@ const reducerFactory = ({ ID, dataID }) => {
           entityState.ACTIONS.push({ ACTION: ACTION.DELETE, PAYLOAD: payload, SNAPSHOT: entity });
           entityState.HISTORY_INDEX = entityState.ACTIONS.length - 1;
         }
-        return state;
+        return newState;
       case CONSTANTS.DELETE_FAILED:
         entityState.STATE = ENTITY_STATE.SYNC_FAILED;
         entityState.SYNC_MSG = payload.error;
-        return state;
+        return newState;
       case CONSTANTS.DELETE_SUCCEEDED:
         entityState.STATE = ENTITY_STATE.SYNCED;
         entityState.SYNC_MSG = '';
@@ -81,21 +82,21 @@ const reducerFactory = ({ ID, dataID }) => {
         break;
       case CONSTANTS.LOAD:
         globalState.STATE = ENTITY_STATE.SYNCING;
-        return state;
+        return newState;
       case CONSTANTS.LOAD_FAILED:
         globalState.STATE = ENTITY_STATE.SYNC_FAILED;
         globalState.SYNC_MSG = payload.error;
-        return state;
+        return newState;
       case CONSTANTS.LOAD_SUCCEEDED:
-        state[STORE_PATH.DATA] = mergeEntities(state[STORE_PATH.DATA], payload);
+        newState[STORE_PATH.DATA] = mergeEntities(state[STORE_PATH.DATA], payload);
         globalState.STATE = ENTITY_STATE.SYNCED;
         globalState.SYNC_MSG = '';
-        return state;
+        return newState;
       case CONSTANTS.UPDATE:
       case CONSTANTS.UPDATE_SYNC:
         if (Object.keys(data).length) {
-          state[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity !== el);
-          state[STORE_PATH.DATA].push({ ...data, [dataID]: entityId });
+          newState[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity !== el);
+          newState[STORE_PATH.DATA].push({ ...data, [dataID]: entityId });
           entityState.STATE = type === CONSTANTS.UPDATE ? ENTITY_STATE.OUT_OF_SYNC : ENTITY_STATE.SYNCING;
 
           if (entityState.ACTIONS.length && entityState.ACTIONS.length > (entityState.HISTORY_INDEX + 1)) {
@@ -105,11 +106,11 @@ const reducerFactory = ({ ID, dataID }) => {
           entityState.ACTIONS.push({ ACTION: ACTION.UPDATE, PAYLOAD: payload, SNAPSHOT: entity });
           entityState.HISTORY_INDEX = entityState.ACTIONS.length - 1;
         }
-        return state;
+        return newState;
       case CONSTANTS.UPDATE_FAILED:
         entityState.STATE = ENTITY_STATE.SYNC_FAILED;
         entityState.SYNC_MSG = payload.error;
-        return state;
+        return newState;
       case CONSTANTS.UPDATE_SUCCEEDED:
         entityState.STATE = ENTITY_STATE.SYNCED;
         entityState.SYNC_MSG = '';
@@ -117,28 +118,28 @@ const reducerFactory = ({ ID, dataID }) => {
         entityState.HISTORY_INDEX = undefined;
         Object.assign(entity, { id, ...data });
         if (previousId !== id) {
-          state[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][id] = entityState;
-          delete state[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][previousId];
+          newState[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][id] = entityState;
+          delete newState[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][previousId];
         }
         break;
       case CONSTANTS.REDO:
         if (entityState.ACTIONS.length && entityState.ACTIONS.length > (entityState.HISTORY_INDEX + 1)) {
-          state[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity !== el);
+          newState[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity !== el);
           entityState.HISTORY_INDEX += 1;
-          state[STORE_PATH.DATA].push(entityState.ACTIONS[entityState.HISTORY_INDEX].SNAPSHOT);
+          newState[STORE_PATH.DATA].push(entityState.ACTIONS[entityState.HISTORY_INDEX].SNAPSHOT);
         }
-        return state;
+        return newState;
       case CONSTANTS.UNDO:
         if (entityState.ACTIONS.length && entityState.HISTORY_INDEX > 0) {
-          state[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity !== el);
+          newState[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity !== el);
           entityState.HISTORY_INDEX -= 1;
-          state[STORE_PATH.DATA].push(entityState.ACTIONS[entityState.HISTORY_INDEX].SNAPSHOT);
+          newState[STORE_PATH.DATA].push(entityState.ACTIONS[entityState.HISTORY_INDEX].SNAPSHOT);
         }
-        return state;
+        return newState;
       case CONSTANTS.DISCARD:
         entityState.ACTIONS = [];
         entityState.HISTORY_INDEX = undefined;
-        return state;
+        return newState;
       case CONSTANTS.SYNC_ALL:
         return state;
       default:
@@ -155,13 +156,12 @@ export const reducersFactory = () => {
       const ID = CONSTANTS_REGEX.DATA_ID_EXP.exec(type)[1];
       if (CONSTANTS_REGEX.INITIALIZE.test(type) && !dataState[ID]) {
         dataState[ID] = reducerFactory({ ID, dataID });
-        state[ID] = dataState[ID](state[ID], action);
       } else if (CONSTANTS_REGEX.DESTRUCT.test(type)) {
         delete dataState[ID];
-        delete state[ID];
-      } else {
-        state[ID] = dataState[ID](state[ID], action);
+        const { [ID]: deletedID, ...newState } = state;
+        return newState;
       }
+      return { ...state, [ID]: dataState[ID](state[ID], action) };
     }
     return state;
   };
