@@ -28,26 +28,25 @@ const DataContainerHOC = ({ destroyOnUnmount, dataID }) =>
 
 const dataContainer = ({
   storeKey = STORE_KEY, dataID = 'id', dataKey, ID, destroyOnUnmount = false, mapStateToProps,
-}) => {
-  const dataSel = dataSelector({ storeKey, dataKey, ID });
-  const stateSel = stateSelector({ storeKey, dataKey, ID });
-  return compose(
-    connect(
-      (state) => {
-        const data = dataSel(state);
-        const dataState = stateSel(state);
-        const props = !mapStateToProps ? {} : mapStateToProps(state, data, dataState);
-        return {
-          data,
-          dataState,
-          ...props,
-        };
-      },
-      actionsFactory(dataKey),
-    ),
-    DataContainerHOC({ ID, dataID, destroyOnUnmount }),
-  );
-};
+}) => compose(
+  connect(
+    (state, ownProps) => {
+      const entityID = (ID instanceof Function) ? ID(ownProps) : ID;
+      const data = dataSelector({
+        storeKey, dataKey, ID: entityID, dataID,
+      })(state);
+      const dataState = stateSelector({ storeKey, dataKey, ID: entityID })(state);
+      const props = !mapStateToProps ? {} : mapStateToProps(state, data, dataState);
+      return {
+        data,
+        dataState,
+        ...props,
+      };
+    },
+    actionsFactory(dataKey),
+  ),
+  DataContainerHOC({ ID, dataID, destroyOnUnmount }),
+);
 
 
 export default dataContainer;

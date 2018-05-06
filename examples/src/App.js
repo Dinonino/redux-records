@@ -24,7 +24,7 @@ const App = () => (
               />
               RxRec examples
             </Menu.Item>
-            <Menu.Item as="a"><Link to="/">Home</Link></Menu.Item>
+            <Menu.Item as="a"><Link to="/edit">New User</Link></Menu.Item>
             <Menu.Item as="a"><Link to="/list">List</Link></Menu.Item>
             <Menu.Item as="a"><Link to="/advanced">Advanced</Link></Menu.Item>
           </Container>
@@ -33,7 +33,7 @@ const App = () => (
         <Container text style={{ marginTop: '7em' }}>
           <Route exact path="/list" component={ListComp} />
           <Route exact path="/advanced" component={Advanced} />
-          <Route exact path="/" component={Basic} />
+          <Route exact path="/edit/:id?" component={Basic} />
         </Container>
 
         <Segment

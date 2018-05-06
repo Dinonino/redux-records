@@ -43,6 +43,12 @@ const basicScreen = (props) => {
 };
 
 export default compose(
-  dataContainer({ dataKey: 'USERS', dataID: 'id', mapaStateToProps: (state, data, dataState) => ({ initialValues: data && Object.keys(data).length ? data : undefined }) }),
+  dataContainer({
+    dataKey: 'USERS',
+    dataID: 'id',
+    ID: ({ match: { params: { id } = {} } = {} }) => id,
+    mapStateToProps: (state, data, dataState) =>
+      ({ initialValues: data && !data.length && Object.keys(data).length ? data : undefined }),
+  }),
   reduxForm({ form: 'Users', enableReinitialize: true }),
 )(basicScreen);
