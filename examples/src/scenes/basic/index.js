@@ -6,7 +6,9 @@ import { Button, Form, Menu, Dropdown, Icon } from 'semantic-ui-react';
 
 const basicScreen = (props) => {
   const {
-    handleSubmit, updateAction, data = {}, undoAction, redoAction, discardAction,
+    handleSubmit, USERS: { data = {} } = {}, USERS_Actions: {
+      updateAction, undoAction, redoAction, discardAction,
+    } = {},
   } = props;
   return (
     <div>
@@ -55,12 +57,14 @@ const basicScreen = (props) => {
 };
 
 export default compose(
-  dataContainer({
-    dataKey: 'USERS',
-    dataID: 'id',
-    ID: ({ match: { params: { id } = {} } = {} }) => id,
-    mapStateToProps: (state, data, dataState) =>
+  dataContainer(
+    {
+      dataKey: 'USERS',
+      dataID: 'id',
+      ID: ({ match: { params: { id } = {} } = {} }) => id,
+    },
+    (state, { USERS: { data } = {} }) =>
       ({ initialValues: data && !data.length && Object.keys(data).length ? data : undefined }),
-  }),
+  ),
   reduxForm({ form: 'Users', enableReinitialize: true }),
 )(basicScreen);

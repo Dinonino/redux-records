@@ -4,7 +4,7 @@ import { Table, Button } from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
 
 const listScreen = (props) => {
-  const { data = [], deleteAction } = props;
+  const { USERS: { data = [] } = {}, USERS_Actions: { deleteAction } = {} } = props;
   return (
     <Table attached>
       <Table.Header>
@@ -24,4 +24,4 @@ const listScreen = (props) => {
   );
 };
 
-export default dataContainer({ dataKey: 'USERS', dataID: 'id' })(listScreen);
+export default dataContainer(['USERS', 'COMMENTS'])(listScreen);
