@@ -15,7 +15,7 @@ const basicScreen = (props) => {
       <Menu attached="top">
 
         <Menu.Item icon="save" onClick={handleSubmit(entity => updateSyncAction({ ...data, ...entity }))} />
-        <Menu.Item icon="pencil square" onClick={() => updateAction(data)} />
+        <Menu.Item icon="pencil square" onClick={handleSubmit(entity => updateAction({ ...data, ...entity }))} />
         <Menu.Item icon="undo" onClick={() => undoAction(data)} />
         <Menu.Item icon="repeat" onClick={() => redoAction(data)} />
         <Menu.Item icon="remove" onClick={() => discardAction(data)} />
