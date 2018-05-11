@@ -20,6 +20,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "start_rest":"json-server --watch db.json --port 3004"
+    "start_rest": "json-server --watch db.json --port 3004",
+    "refresh_db": "pwd & cp -rf ./db_template.json ./db.json"
   }
 }

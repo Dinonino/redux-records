@@ -1,9 +1,8 @@
 {
-  "users": [],
   "posts": [
     {
       "id": 1,
-      "title": "json-server",
+      "title": "Test",
       "author": "typicode"
     }
   ],
@@ -13,6 +12,8 @@
       "body": "some comment",
       "postId": 1
     }
+  ],
+  "users": [
   ],
   "profile": {
     "name": "typicode"
