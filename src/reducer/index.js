@@ -1,18 +1,6 @@
 import { STORE_PATH, ACTION, ENTITY_STATE, STORE_KEY } from './constants';
 import { constantsFactory, CONSTANTS_REGEX } from '../actions';
 
-/**
- * Based on https://github.com/Steve-Fenton/TypeScriptUtilities
- * implementation of GUID
- * @returns {string} GUID string
- */
-const getGUID = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-  let r = Math.random() * 16 | 0,
-    v = c === 'x' ? r : (r & 0x3 | 0x8);
-  return v.toString(16);
-});
-
-
 const mergeEntities = (previousEntities, newEntities, id) => {
   const retValue = [];
   const prevDict = previousEntities.reduce((dict, elem) => ({ ...dict, [elem[id]]: elem }), {});
@@ -46,11 +34,15 @@ const reducerFactory = ({ ID, dataID }) => {
   };
   return (state = initialState, { type, payload }) => {
     const newState = { ...state };
-    const { entity: { [dataID]: id = '', ...data } = {}, previousId } = payload || {};
-    const entityId = previousId || id || getGUID();
-    const entity = state[STORE_PATH.DATA].find(el => el[dataID] === entityId);
+    const { entity: { [dataID]: id = '', ...data } = {}, previousId, tempID } = payload || {};
+    const entityId = id || tempID;
+    const filterId = previousId || id;
+    const entity = state[STORE_PATH.DATA].find(el => el[dataID] === filterId);
     if (Object.keys(data).length && !state[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][entityId]) {
-      newState[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][entityId] = { ACTIONS: [] };
+      newState[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][entityId] = {
+        ACTIONS: [],
+        STATE: tempID ? ENTITY_STATE.NEW : ENTITY_STATE.SYNCED,
+      };
     }
     const entityState = state[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][entityId];
 
@@ -60,9 +52,12 @@ const reducerFactory = ({ ID, dataID }) => {
       case CONSTANTS.DELETE_SYNC:
         if (entityState.ACTIONS[entityState.HISTORY_INDEX].ACTION !== ACTION.DELETE) {
           newState[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity !== el);
-          entityState.STATE = type === CONSTANTS.DELETE ? ENTITY_STATE.OUT_OF_SYNC : ENTITY_STATE.SYNCING;
+          entityState.STATE = type === CONSTANTS.DELETE ?
+            ENTITY_STATE.OUT_OF_SYNC :
+            ENTITY_STATE.SYNCING;
 
-          if (entityState.ACTIONS.length && entityState.ACTIONS.length > (entityState.HISTORY_INDEX + 1)) {
+          if (entityState.ACTIONS.length &&
+            entityState.ACTIONS.length > (entityState.HISTORY_INDEX + 1)) {
             entityState.ACTIONS.splice(state.HISTORY_INDEX);
           }
           if (entityState.ACTIONS.length) {
@@ -99,9 +94,16 @@ const reducerFactory = ({ ID, dataID }) => {
         if (Object.keys(data).length) {
           newState[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity !== el);
           newState[STORE_PATH.DATA].push({ ...data, [dataID]: entityId });
-          entityState.STATE = type === CONSTANTS.UPDATE ? ENTITY_STATE.OUT_OF_SYNC : ENTITY_STATE.SYNCING;
+          if (tempID) {
+            entityState.STATE = ENTITY_STATE.NEW;
+          } else {
+            entityState.STATE = type === CONSTANTS.UPDATE_SYNC ?
+              ENTITY_STATE.SYNCING :
+              ENTITY_STATE.OUT_OF_SYNC;
+          }
 
-          if (entityState.ACTIONS.length && entityState.ACTIONS.length > (entityState.HISTORY_INDEX + 1)) {
+          if (entityState.ACTIONS.length &&
+            entityState.ACTIONS.length > (entityState.HISTORY_INDEX + 1)) {
             entityState.ACTIONS.splice(entityState.HISTORY_INDEX);
           }
           if (entityState.ACTIONS.length) {
@@ -116,18 +118,29 @@ const reducerFactory = ({ ID, dataID }) => {
         entityState.SYNC_MSG = payload.error;
         return newState;
       case CONSTANTS.UPDATE_SUCCEEDED:
+        newState[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity !== el);
+        newState[STORE_PATH.DATA].push({ ...data, [dataID]: entityId });
+
         entityState.STATE = ENTITY_STATE.SYNCED;
         entityState.SYNC_MSG = '';
         entityState.ACTIONS = [];
         entityState.HISTORY_INDEX = undefined;
-        Object.assign(entity, { id, ...data });
-        if (previousId !== id) {
-          newState[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][id] = entityState;
-          delete newState[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][previousId];
+        newState[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][entityId] = {
+          STATE: ENTITY_STATE.SYNCED,
+          SYNC_MSG: '',
+          ACTIONS: [],
+        };
+
+        if (previousId) {
+          newState[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][previousId] = {
+            STATE: ENTITY_STATE.ID_UPDATED,
+            UPDATED_ID: entityId,
+          };
         }
         break;
       case CONSTANTS.REDO:
-        if (entityState.ACTIONS.length && entityState.ACTIONS.length > (entityState.HISTORY_INDEX + 1)) {
+        if (entityState.ACTIONS.length &&
+          entityState.ACTIONS.length > (entityState.HISTORY_INDEX + 1)) {
           newState[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity !== el);
           entityState.HISTORY_INDEX += 1;
           newState[STORE_PATH.DATA].push(entityState.ACTIONS[entityState.HISTORY_INDEX].SNAPSHOT);
@@ -154,6 +167,7 @@ const reducerFactory = ({ ID, dataID }) => {
       default:
         return state;
     }
+    return state;
   };
 };
 

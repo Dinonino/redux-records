@@ -7,10 +7,14 @@ const actionsFactory = (dataKey) => {
   const loadFailedAction = error => ({ type: constants.LOAD_FAILED, payload: error });
   const loadSucceededAction = () => ({ type: constants.LOAD_SUCCEEDED });
 
-  const updateAction = entity => ({ type: constants.UPDATE, payload: { entity } });
-  const updateSyncAction = entity => ({ type: constants.UPDATE_SYNC, payload: { entity } });
-  const updateFailedAction = error => ({ type: constants.UPDATE_FAILED, payload: error });
-  const updateSucceededAction = (previousId, entity) => ({ type: constants.UPDATE_SUCCEEDED, payload: { previousId, entity } });
+  const updateAction = (entity, tempID) =>
+    ({ type: constants.UPDATE, payload: { entity, tempID } });
+  const updateSyncAction = (entity, tempID) =>
+    ({ type: constants.UPDATE_SYNC, payload: { entity, tempID } });
+  const updateFailedAction = error =>
+    ({ type: constants.UPDATE_FAILED, payload: error });
+  const updateSucceededAction = (previousId, entity) =>
+    ({ type: constants.UPDATE_SUCCEEDED, payload: { previousId, entity } });
 
   const deleteAction = entity => ({ type: constants.DELETE, payload: { entity } });
   const deleteSyncAction = entity => ({ type: constants.DELETE_SYNC, payload: { entity } });

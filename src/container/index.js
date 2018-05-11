@@ -5,12 +5,25 @@ import { STORE_KEY } from '../reducer/constants';
 import { stateSelector, dataSelector } from '../selectors';
 import actionsFactory from '../actions/index';
 
+
+/**
+ * Based on https://github.com/Steve-Fenton/TypeScriptUtilities
+ * implementation of GUID
+ * @returns {string} GUID string
+ */
+const getGUID = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+  let r = Math.random() * 16 | 0,
+    v = c === 'x' ? r : (r & 0x3 | 0x8);
+  return v.toString(16);
+});
+
+
 const DataContainerHOC = entities =>
   WrappedComponent => class DataContainer extends Component {
     componentWillMount() {
       for (let index = 0; index < entities.length; index += 1) {
         const { dataID, dataKey } = entities[index];
-        const { [`${dataKey}_Actions`]: { initializeStore } = {} } = this.props;
+        const { [dataKey]: { actions: { initializeStore } = {} } = {} } = this.props;
         initializeStore(dataID);
       }
     }
@@ -18,7 +31,7 @@ const DataContainerHOC = entities =>
     componentWillUnmount() {
       for (let index = 0; index < entities.length; index += 1) {
         const { destroyOnUnmount, dataKey } = entities[index];
-        const { [`${dataKey}_Actions`]: { destructStore } = {} } = this.props;
+        const { [dataKey]: { actions: { destructStore } = {} } = {} } = this.props;
         if (destroyOnUnmount) {
           destructStore();
         }
@@ -33,9 +46,14 @@ const DataContainerHOC = entities =>
   };
 
 const entityMapStateToProps = (state, ownProps, {
-  storeKey = STORE_KEY, dataID = 'id', dataKey, ID, mapStateToProps,
+  storeKey = STORE_KEY,
+  dataKey,
+  ID,
+  mapStateToProps,
+  tempId,
 }) => {
-  const entityID = (ID instanceof Function) ? ID(ownProps) : ID;
+  const entityID = tempId ||
+    (ID instanceof Function ? ID(ownProps) : ID);
   const data = dataSelector({
     storeKey, dataKey, ID: entityID,
   })(state);
@@ -77,36 +95,69 @@ const calculateConfig = (config) => {
 
 const dataContainer = (config, mapStateToProps) => {
   const configurations = calculateConfig(config);
-
+  const tempId = {};
   const mapProps = (state, ownProps) => {
-    const ret = {};
+    const data = {};
     for (let index = 0; index < configurations.length; index += 1) {
       const element = configurations[index];
       const { dataKey } = element;
-      ret[dataKey] = entityMapStateToProps(state, ownProps, element);
+      data[dataKey] = entityMapStateToProps(state, ownProps, { ...element, tempId: tempId[dataKey] });
     }
     if (mapStateToProps) {
       return {
-        ...ret,
-        ...mapStateToProps(state, ret),
+        data,
+        ...mapStateToProps(state, data),
       };
     }
-    return ret;
+    return { data };
   };
 
   const mapActions = (dispatch) => {
-    const ret = {};
+    const mappedActions = {};
     for (let index = 0; index < configurations.length; index += 1) {
       const { dataKey } = configurations[index];
-      ret[`${dataKey}_Actions`] = bindActionCreators(actionsFactory(dataKey), dispatch);
+      const actions = bindActionCreators(actionsFactory(dataKey), dispatch);
+      mappedActions[dataKey] = {
+        ...actions,
+        updateAction: ({ id, ...entity }) => {
+          if (id) {
+            actions.updateAction({ id, ...entity });
+          } else {
+            tempId[dataKey] = tempId[dataKey] || getGUID();
+            actions.updateAction(entity, tempId[dataKey]);
+          }
+        },
+        updateSyncAction: ({ id, ...entity }) => {
+          if (id) {
+            actions.updateSyncAction({ id, ...entity });
+          } else {
+            tempId[dataKey] = tempId[dataKey] || getGUID();
+            actions.updateSyncAction(entity, tempId[dataKey]);
+          }
+        },
+      };
     }
-    return ret;
+    return mappedActions;
+  };
+
+  const mergeProps = ({ data, ...restOfData }, actions, ownProps) => {
+    const entities = {};
+    for (let index = 0; index < configurations.length; index += 1) {
+      const { dataKey } = configurations[index];
+      entities[dataKey] = {
+        data: data[dataKey].data,
+        state: data[dataKey].state,
+        actions: actions[dataKey],
+      };
+    }
+    return { ...entities, ...restOfData, ...ownProps };
   };
 
   return compose(
     connect(
       mapProps,
       mapActions,
+      mergeProps,
     ),
     DataContainerHOC(configurations),
   );

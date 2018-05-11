@@ -7,10 +7,12 @@ export const STORE_PATH = {
 };
 
 export const ENTITY_STATE = {
+  NEW: 'NEW',
   SYNCED: 'SYNCED',
   SYNC_FAILED: 'SYNC_FAILED',
   SYNCING: 'SYNCING',
   OUT_OF_SYNC: 'OUT_OF_SYNC',
+  ID_UPDATED: 'ID_UPDATED',
 };
 
 export const ACTION = {
