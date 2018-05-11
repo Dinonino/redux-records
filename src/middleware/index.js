@@ -47,7 +47,7 @@ const apiMiddleware = ({ storeKey = STORE_KEY, endpoints = {} }) =>
           } else if (constants.LOAD_SYNC.test(type)) {
             handler('load', payload, actionCreators.loadSucceededAction, actionCreators.loadFailedAction);
           } else if (constants.UPDATE_SYNC.test(type)) {
-            handler('update', entity, actionCreators.updateSucceededAction, actionCreators.updateFailedAction);
+            handler('update', entity, handleUpdateSuccess(entity[dataID], actionCreators.updateSucceededAction), actionCreators.updateFailedAction);
           } else if (constants.SYNC_ALL.test(type)) {
             const actions = actionsSelector({ storeKey, dataKey })(getState());
             for (let index = 0; index < actions.length; index += 1) {
@@ -55,10 +55,10 @@ const apiMiddleware = ({ storeKey = STORE_KEY, endpoints = {} }) =>
               const { type: actionType, action: actionPayload } = entityAction;
               switch (actionType) {
                 case ACTION.DELETE:
-                  handler('delete', actionPayload, actions.deleteSucceededAction, actions.deleteFailedAction);
+                  handler('delete', actionPayload, actionCreators.deleteSucceededAction, actionCreators.deleteFailedAction);
                   break;
                 case ACTION.UPDATE:
-                  handler('update', actionPayload, handleUpdateSuccess(entity[dataID], actions.updateSucceededAction), actions.updateFailedAction);
+                  handler('update', actionPayload, handleUpdateSuccess(entity[dataID], actionCreators.updateSucceededAction), actionCreators.updateFailedAction);
                   break;
                 default:
                   break;
