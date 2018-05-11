@@ -1,10 +1,10 @@
-import { ACTION } from '../reducer/constants';
+import { ACTION, STORE_KEY } from '../reducer/constants';
 import * as constants from '../actions/constants';
 import actionsFactory from '../actions';
-import { actionsSelector } from '../selectors';
+import { actionsSelector, dataIDSelector } from '../selectors';
 
 const isPromise = obj => !!obj && (typeof obj === 'object' || typeof obj === 'function') && typeof obj.then === 'function';
-const handleAction = (options, dispatch) => (payload, apiKey, actionSucceeded, actionFailed) => {
+const handleAction = (options, dispatch) => (apiKey, payload, actionSucceeded, actionFailed) => {
   if (options && apiKey && options[apiKey] && typeof options[apiKey] === 'function') {
     try {
       const resultPromise = options[apiKey](payload);
@@ -26,46 +26,47 @@ const handleAction = (options, dispatch) => (payload, apiKey, actionSucceeded, a
 };
 
 
-const handleUpdateSuccess = (previousId, updateSucceededAction) => payload => updateSucceededAction(previousId, updateSucceededAction);
+const handleUpdateSuccess = (previousId, updateSucceededAction) =>
+  payload =>
+    updateSucceededAction(previousId, payload);
 
-
-const apiMiddleware = options => ({ dispatch, getState }) => next => (action) => {
-  const { type, payload } = action;
-  if (type.startsWith(constants.ID)) {
-    const id = constants.DATA_ID_EXP.exec(type)[0];
-    const actionCreators = actionsFactory(id);
-    const api = options[id];
-    const handler = handleAction(api, dispatch);
-    if (constants.DELETE_SYNC.test(type)) {
-      handler('delete', actionCreators.deleteSucceededAction, actionCreators.deleteFailedAction, payload);
-    } else if (constants.LOAD_SYNC.test(type)) {
-      handler('load', actionCreators.loadSucceededAction, actionCreators.loadFailedAction, payload);
-    } else if (constants.LOAD_SYNC.test(type)) {
-      handler('update', actionCreators.updateSucceededAction, actionCreators.updateFailedAction, payload);
-    } else if (constants.SYNC_ALL.test(type)) {
-      const actions = actionsSelector(getState(), id);
-
-      for (let index = 0; index < actions.length; index += 1) {
-        const entityAction = actions[index];
-
-
-        const { type: actionType, action: actionPayload } = entityAction;
-        switch (actionType) {
-          case ACTION.DELETE:
-            handler('delete', actions.deleteSucceededAction, actions.deleteFailedAction, actionPayload);
-            break;
-          case ACTION.UPDATE:
-            handler('update', (result) => {
-
-            }, handleUpdateSuccess(id, actions.updateSucceededAction), actions.updateFailedAction, actionPayload);
-            break;
-          default:
-            break;
+const apiMiddleware = ({ storeKey = STORE_KEY, endpoints = {} }) =>
+  ({ dispatch, getState }) =>
+    next =>
+      (action) => {
+        const { type, payload = {} } = action;
+        if (type.startsWith(constants.ID)) {
+          const { entity } = payload;
+          const dataKey = constants.DATA_ID_EXP.exec(type)[1];
+          const actionCreators = actionsFactory(dataKey);
+          const api = endpoints[dataKey];
+          const handler = handleAction(api, dispatch);
+          const dataID = dataIDSelector({ storeKey, dataKey })(getState());
+          if (constants.DELETE_SYNC.test(type)) {
+            handler('delete', entity, actionCreators.deleteSucceededAction, actionCreators.deleteFailedAction);
+          } else if (constants.LOAD_SYNC.test(type)) {
+            handler('load', payload, actionCreators.loadSucceededAction, actionCreators.loadFailedAction);
+          } else if (constants.UPDATE_SYNC.test(type)) {
+            handler('update', entity, actionCreators.updateSucceededAction, actionCreators.updateFailedAction);
+          } else if (constants.SYNC_ALL.test(type)) {
+            const actions = actionsSelector({ storeKey, dataKey })(getState());
+            for (let index = 0; index < actions.length; index += 1) {
+              const entityAction = actions[index];
+              const { type: actionType, action: actionPayload } = entityAction;
+              switch (actionType) {
+                case ACTION.DELETE:
+                  handler('delete', actionPayload, actions.deleteSucceededAction, actions.deleteFailedAction);
+                  break;
+                case ACTION.UPDATE:
+                  handler('update', actionPayload, handleUpdateSuccess(entity[dataID], actions.updateSucceededAction), actions.updateFailedAction);
+                  break;
+                default:
+                  break;
+              }
+            }
+          }
         }
-      }
-    }
-  }
-  next(action);
-};
+        next(action);
+      };
 
 export default apiMiddleware;

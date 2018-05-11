@@ -38,7 +38,7 @@ const mergeEntities = (previousEntities, newEntities, id) => {
 const reducerFactory = ({ ID, dataID }) => {
   const CONSTANTS = constantsFactory(ID);
   const initialState = {
-    [STORE_PATH.KEY]: ID,
+    [STORE_PATH.KEY]: dataID,
     [STORE_PATH.DATA]: [],
     [STORE_PATH.STATE]: {
       [STORE_PATH.ENTITIES_STATE]: {},

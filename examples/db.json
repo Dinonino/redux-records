@@ -13,6 +13,47 @@
       "postId": 1
     }
   ],
+  "users": [
+    {
+      "entity": {
+        "firstName": "Ivan",
+        "lastName": "Varga"
+      },
+      "id": 1
+    },
+    {
+      "entity": {
+        "firstName": "Ivan",
+        "lastName": "Varga"
+      },
+      "id": 2
+    },
+    {
+      "firstName": "Ivan",
+      "lastName": "Varga",
+      "id": 3
+    },
+    {
+      "firstName": "Ivan",
+      "lastName": "Varga",
+      "id": 4
+    },
+    {
+      "firstName": "Ivan",
+      "lastName": "Varga",
+      "id": 32
+    },
+    {
+      "firstName": "Ivan",
+      "lastName": "Varga",
+      "id": "dsfasdf adsfasdf adsfadsfads"
+    },
+    {
+      "firstName": "Ivan",
+      "lastName": "Varga",
+      "id": 33
+    }
+  ],
   "profile": {
     "name": "typicode"
   }

@@ -7,14 +7,15 @@ import { Button, Form, Menu, Dropdown, Icon } from 'semantic-ui-react';
 const basicScreen = (props) => {
   const {
     handleSubmit, USERS: { data = {} } = {}, USERS_Actions: {
-      updateAction, undoAction, redoAction, discardAction,
+      updateAction, undoAction, redoAction, discardAction, updateSyncAction
     } = {},
   } = props;
   return (
     <div>
       <Menu attached="top">
 
-        <Menu.Item icon="save" onClick={handleSubmit(entity => updateAction({ ...data, ...entity }))} />
+        <Menu.Item icon="save" onClick={handleSubmit(entity => updateSyncAction({ ...data, ...entity }))} />
+        <Menu.Item icon="pencil square" onClick={() => updateAction(data)} />
         <Menu.Item icon="undo" onClick={() => undoAction(data)} />
         <Menu.Item icon="repeat" onClick={() => redoAction(data)} />
         <Menu.Item icon="remove" onClick={() => discardAction(data)} />

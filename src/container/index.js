@@ -37,7 +37,7 @@ const entityMapStateToProps = (state, ownProps, {
 }) => {
   const entityID = (ID instanceof Function) ? ID(ownProps) : ID;
   const data = dataSelector({
-    storeKey, dataKey, ID: entityID, dataID,
+    storeKey, dataKey, ID: entityID,
   })(state);
   const dataState = stateSelector({ storeKey, dataKey, ID: entityID })(state);
   const props = !mapStateToProps ? {} : mapStateToProps(state, data, dataState);
