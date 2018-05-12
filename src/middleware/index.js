@@ -26,9 +26,21 @@ const handleAction = (options, dispatch) => (apiKey, payload, actionSucceeded, a
 };
 
 
-const handleUpdateSuccess = (previousId, updateSucceededAction) =>
+const handleUpdateSuccess = (id, updateSucceededAction) =>
   payload =>
-    updateSucceededAction(previousId, payload);
+    updateSucceededAction(payload, id);
+
+const handleUpdateFailed = (id, updateFailedAction) =>
+  payload =>
+    updateFailedAction(id, payload);
+
+const handleDeleteSuccess = (previousId, deleteSucceededAction) =>
+  payload =>
+    deleteSucceededAction(previousId, payload);
+
+const handleDeleteFailed = (id, deleteFailedAction) =>
+  payload =>
+    deleteFailedAction(id, payload);
 
 const apiMiddleware = ({ storeKey = STORE_KEY, endpoints = {} }) =>
   ({ dispatch, getState }) =>

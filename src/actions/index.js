@@ -7,19 +7,20 @@ const actionsFactory = (dataKey) => {
   const loadFailedAction = error => ({ type: constants.LOAD_FAILED, payload: error });
   const loadSucceededAction = () => ({ type: constants.LOAD_SUCCEEDED });
 
-  const updateAction = (entity, tempID) =>
-    ({ type: constants.UPDATE, payload: { entity, tempID } });
-  const updateSyncAction = (entity, tempID) =>
-    ({ type: constants.UPDATE_SYNC, payload: { entity, tempID } });
-  const updateFailedAction = error =>
-    ({ type: constants.UPDATE_FAILED, payload: error });
-  const updateSucceededAction = (previousId, entity) =>
-    ({ type: constants.UPDATE_SUCCEEDED, payload: { previousId, entity } });
+  const updateAction = (entity, entityId) =>
+    ({ type: constants.UPDATE, payload: { entity, entityId } });
+  const updateSyncAction = (entity, entityId) =>
+    ({ type: constants.UPDATE_SYNC, payload: { entity, entityId } });
+  const updateFailedAction = (entityId, error) =>
+    ({ type: constants.UPDATE_FAILED, payload: { entityId, error } });
+  const updateSucceededAction = (entityId, entity) =>
+    ({ type: constants.UPDATE_SUCCEEDED, payload: { entityId, entity } });
 
   const deleteAction = entity => ({ type: constants.DELETE, payload: { entity } });
   const deleteSyncAction = entity => ({ type: constants.DELETE_SYNC, payload: { entity } });
-  const deleteFailedAction = error => ({ type: constants.DELETE_FAILED, payload: error });
-  const deleteSucceededAction = () => ({ type: constants.DELETE_SUCCEEDED });
+  const deleteFailedAction = (entityId, error) => ({ type: constants.DELETE_FAILED, payload: { entityId, error } });
+  const deleteSucceededAction = entityId =>
+    ({ type: constants.DELETE_SUCCEEDED, payload: { entityId } });
 
   const undoAction = entity => ({ type: constants.UNDO, payload: { entity } });
   const redoAction = entity => ({ type: constants.REDO, payload: { entity } });

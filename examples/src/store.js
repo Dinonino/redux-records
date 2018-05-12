@@ -18,7 +18,7 @@ const entityPoint = entity => ({
   }),
   update: ({ id, ...entityBody }) => {
     if (id) {
-      return fetch(`${baseUrl}/${entity}/id`, {
+      return fetch(`${baseUrl}/${entity}/${id}`, {
         ...defaultOptions,
         body: JSON.stringify(entityBody),
         method: 'PUT',

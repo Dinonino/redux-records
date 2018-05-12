@@ -34,17 +34,16 @@ const reducerFactory = ({ ID, dataID }) => {
   };
   return (state = initialState, { type, payload }) => {
     const newState = { ...state };
-    const { entity: { [dataID]: id = '', ...data } = {}, previousId, tempID } = payload || {};
-    const entityId = id || tempID;
-    const filterId = previousId || id;
+    const { entity: { [dataID]: id = '', ...data } = {}, entityId } = payload || {};
+    const stateId = id || entityId;
+    const filterId = entityId || id;
     const entity = state[STORE_PATH.DATA].find(el => el[dataID] === filterId);
-    if (Object.keys(data).length && !state[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][entityId]) {
-      newState[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][entityId] = {
+    if (Object.keys(data).length && !state[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][stateId]) {
+      newState[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][stateId] = {
         ACTIONS: [],
-        STATE: tempID ? ENTITY_STATE.NEW : ENTITY_STATE.SYNCED,
       };
     }
-    const entityState = state[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][entityId];
+    const entityState = state[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][stateId];
 
     const globalState = state[STORE_PATH.STATE];
     switch (type) {
@@ -94,12 +93,14 @@ const reducerFactory = ({ ID, dataID }) => {
         if (Object.keys(data).length) {
           newState[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity !== el);
           newState[STORE_PATH.DATA].push({ ...data, [dataID]: entityId });
-          if (tempID) {
-            entityState.STATE = ENTITY_STATE.NEW;
-          } else {
-            entityState.STATE = type === CONSTANTS.UPDATE_SYNC ?
-              ENTITY_STATE.SYNCING :
-              ENTITY_STATE.OUT_OF_SYNC;
+          if (!entityState.STATE) {
+            if (type === CONSTANTS.UPDATE_SYNC) {
+              entityState.STATE = ENTITY_STATE.SYNCING;
+            } else {
+              entityState.STATE = !id ?
+                ENTITY_STATE.NEW :
+                ENTITY_STATE.OUT_OF_SYNC;
+            }
           }
 
           if (entityState.ACTIONS.length &&
