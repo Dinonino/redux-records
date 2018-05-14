@@ -13,7 +13,7 @@ const actionsFactory = (dataKey) => {
     ({ type: constants.UPDATE_SYNC, payload: { entity, entityId } });
   const updateFailedAction = (entityId, error) =>
     ({ type: constants.UPDATE_FAILED, payload: { entityId, error } });
-  const updateSucceededAction = (entityId, entity) =>
+  const updateSucceededAction = (entity, entityId) =>
     ({ type: constants.UPDATE_SUCCEEDED, payload: { entityId, entity } });
 
   const deleteAction = entity => ({ type: constants.DELETE, payload: { entity } });

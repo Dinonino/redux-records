@@ -120,7 +120,7 @@ const reducerFactory = ({ ID, dataID }) => {
         return newState;
       case CONSTANTS.UPDATE_SUCCEEDED:
         newState[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity !== el);
-        newState[STORE_PATH.DATA].push({ ...data, [dataID]: entityId });
+        newState[STORE_PATH.DATA].push({ ...data, [dataID]: id });
 
         entityState.STATE = ENTITY_STATE.SYNCED;
         entityState.SYNC_MSG = '';
