@@ -92,7 +92,7 @@ const reducerFactory = ({ ID, dataID }) => {
       case CONSTANTS.UPDATE_SYNC:
         if (Object.keys(data).length) {
           newState[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity !== el);
-          newState[STORE_PATH.DATA].push({ ...data, [dataID]: entityId });
+          newState[STORE_PATH.DATA].push({ ...data, [dataID]: stateId });
           if (!entityState.STATE) {
             if (type === CONSTANTS.UPDATE_SYNC) {
               entityState.STATE = ENTITY_STATE.SYNCING;
@@ -126,16 +126,16 @@ const reducerFactory = ({ ID, dataID }) => {
         entityState.SYNC_MSG = '';
         entityState.ACTIONS = [];
         entityState.HISTORY_INDEX = undefined;
-        newState[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][entityId] = {
+        newState[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][id] = {
           STATE: ENTITY_STATE.SYNCED,
           SYNC_MSG: '',
           ACTIONS: [],
         };
 
-        if (previousId) {
-          newState[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][previousId] = {
+        if (entityId) {
+          newState[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][entityId] = {
             STATE: ENTITY_STATE.ID_UPDATED,
-            UPDATED_ID: entityId,
+            UPDATED_ID: id,
           };
         }
         break;

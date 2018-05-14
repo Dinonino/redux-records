@@ -8,7 +8,6 @@ const basicScreen = (props) => {
   const {
     handleSubmit, USERS: {
       data,
-      state,
       actions: {
         updateAction, undoAction, redoAction, discardAction, updateSyncAction,
       } = {},

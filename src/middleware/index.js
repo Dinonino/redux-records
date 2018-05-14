@@ -1,29 +1,39 @@
-import { ACTION, STORE_KEY } from '../reducer/constants';
+import { ACTION, STORE_KEY, ENTITY_STATE } from '../reducer/constants';
 import * as constants from '../actions/constants';
 import actionsFactory from '../actions';
-import { actionsSelector, dataIDSelector } from '../selectors';
+import { actionsSelector, dataIDSelector, stateSelector } from '../selectors';
 
-const isPromise = obj => !!obj && (typeof obj === 'object' || typeof obj === 'function') && typeof obj.then === 'function';
-const handleAction = (options, dispatch) => (apiKey, payload, actionSucceeded, actionFailed) => {
-  if (options && apiKey && options[apiKey] && typeof options[apiKey] === 'function') {
-    try {
-      const resultPromise = options[apiKey](payload);
-      if (isPromise(resultPromise)) {
-        resultPromise.then((result) => {
-          dispatch(actionSucceeded(result));
-        }, (error) => {
-          dispatch(actionFailed(error));
-        });
-      } else {
-        dispatch(actionFailed('Invalid method implementation'));
+const isPromise = obj => !!obj &&
+  (typeof obj === 'object' || typeof obj === 'function') &&
+  typeof obj.then === 'function';
+
+const handleAction = (options, dispatch) =>
+  ({
+    actionKey,
+    payload,
+    actionSucceeded,
+    actionFailed,
+  }) => {
+    const { [actionKey]: action } = options || {};
+    if (typeof action === 'function') {
+      try {
+        const resultPromise = options[actionKey](payload);
+        if (isPromise(resultPromise)) {
+          resultPromise.then((result) => {
+            dispatch(actionSucceeded(result));
+          }, (error) => {
+            dispatch(actionFailed(error));
+          });
+        } else {
+          dispatch(actionFailed('Invalid method implementation'));
+        }
+      } catch (exception) {
+        dispatch(actionFailed(exception));
       }
-    } catch (exception) {
-      dispatch(actionFailed(exception));
+    } else {
+      dispatch(actionFailed('Method not implemented'));
     }
-  } else {
-    dispatch(actionFailed('Method not implemented'));
-  }
-};
+  };
 
 
 const handleUpdateSuccess = (id, updateSucceededAction) =>
@@ -34,9 +44,9 @@ const handleUpdateFailed = (id, updateFailedAction) =>
   payload =>
     updateFailedAction(id, payload);
 
-const handleDeleteSuccess = (previousId, deleteSucceededAction) =>
+const handleDeleteSuccess = (id, deleteSucceededAction) =>
   payload =>
-    deleteSucceededAction(previousId, payload);
+    deleteSucceededAction(id, payload);
 
 const handleDeleteFailed = (id, deleteFailedAction) =>
   payload =>
@@ -46,31 +56,91 @@ const apiMiddleware = ({ storeKey = STORE_KEY, endpoints = {} }) =>
   ({ dispatch, getState }) =>
     next =>
       (action) => {
+        next(action);
         const { type, payload = {} } = action;
         if (type.startsWith(constants.ID)) {
-          const { entity } = payload;
+          const { entity, entityId } = payload;
           const dataKey = constants.DATA_ID_EXP.exec(type)[1];
           const actionCreators = actionsFactory(dataKey);
           const api = endpoints[dataKey];
           const handler = handleAction(api, dispatch);
           const dataID = dataIDSelector({ storeKey, dataKey })(getState());
+          const state = stateSelector({
+            storeKey,
+            dataKey,
+            ID: entityId || (entity && entity[dataID]),
+          })(getState());
+          const { [dataID]: id, ...data } = entity || {};
+          if (state && (state.STATE !== ENTITY_STATE.NEW)) {
+            data[dataID] = id;
+          }
           if (constants.DELETE_SYNC.test(type)) {
-            handler('delete', entity, actionCreators.deleteSucceededAction, actionCreators.deleteFailedAction);
+            handler({
+              actionKey: 'delete',
+              payload: entity,
+              actionSucceeded: handleDeleteSuccess(
+                entity[dataID],
+                actionCreators.deleteSucceededAction,
+              ),
+              actionFailed: handleDeleteFailed(
+                entity[dataID],
+                actionCreators.deleteFailedAction,
+              ),
+            });
           } else if (constants.LOAD_SYNC.test(type)) {
-            handler('load', payload, actionCreators.loadSucceededAction, actionCreators.loadFailedAction);
+            handler({
+              actionKey: 'load',
+              payload,
+              actionSucceeded: actionCreators.loadSucceededAction,
+              actionFailed: actionCreators.loadFailedAction,
+            });
           } else if (constants.UPDATE_SYNC.test(type)) {
-            handler('update', entity, handleUpdateSuccess(entity[dataID], actionCreators.updateSucceededAction), actionCreators.updateFailedAction);
+            handler({
+              actionKey: 'update',
+              payload: data,
+              actionSucceeded: handleUpdateSuccess(
+                entity[dataID],
+                actionCreators.updateSucceededAction,
+              ),
+              actionFailed: handleUpdateFailed(
+                entity[dataID],
+                actionCreators.updateFailedAction,
+              ),
+            });
           } else if (constants.SYNC_ALL.test(type)) {
             const actions = actionsSelector({ storeKey, dataKey })(getState());
             for (let index = 0; index < actions.length; index += 1) {
               const entityAction = actions[index];
               const { type: actionType, action: actionPayload } = entityAction;
+              const { entity: actionEntity } = actionPayload;
               switch (actionType) {
                 case ACTION.DELETE:
-                  handler('delete', actionPayload, actionCreators.deleteSucceededAction, actionCreators.deleteFailedAction);
+                  handler({
+                    actionKey: 'delete',
+                    payload: actionEntity,
+                    actionSucceeded: handleDeleteSuccess(
+                      actionEntity[dataID],
+                      actionCreators.deleteSucceededAction,
+                    ),
+                    actionFailed: handleDeleteFailed(
+                      actionEntity[dataID],
+                      actionCreators.deleteFailedAction,
+                    ),
+                  });
                   break;
                 case ACTION.UPDATE:
-                  handler('update', actionPayload, handleUpdateSuccess(entity[dataID], actionCreators.updateSucceededAction), actionCreators.updateFailedAction);
+                  handler({
+                    actionKey: 'update',
+                    payload: actionEntity,
+                    actionSucceeded: handleUpdateSuccess(
+                      entity[dataID],
+                      actionCreators.updateSucceededAction,
+                    ),
+                    actionFailed: handleUpdateFailed(
+                      entity[dataID],
+                      actionCreators.updateFailedAction,
+                    ),
+                  });
                   break;
                 default:
                   break;
@@ -78,7 +148,6 @@ const apiMiddleware = ({ storeKey = STORE_KEY, endpoints = {} }) =>
             }
           }
         }
-        next(action);
       };
 
 export default apiMiddleware;

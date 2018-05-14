@@ -13,11 +13,13 @@ const listScreen = (props) => {
         <Table.HeaderCell />
       </Table.Header>
       <Table.Body>
-        {data.map(({ firstName, lastName, ...entity }) => (
-          <Table.Row>
-            <Table.Cell><Link to={`/edit/${entity.id}`}>{firstName}</Link> </Table.Cell>
-            <Table.Cell><Link to={`/edit/${entity.id}`}>{lastName}</Link></Table.Cell>
-            <Table.Cell><Button size="small" onClick={() => deleteAction(entity)}>Delete</Button></Table.Cell>
+        {data.map(({
+          firstName, lastName, id,
+        }) => (
+          <Table.Row key={id}>
+            <Table.Cell><Link to={`/edit/${id}`}>{firstName}</Link> </Table.Cell>
+            <Table.Cell><Link to={`/edit/${id}`}>{lastName}</Link></Table.Cell>
+            <Table.Cell><Button size="small" onClick={() => deleteAction({ id })}>Delete</Button></Table.Cell>
           </Table.Row>))}
       </Table.Body>
     </Table>

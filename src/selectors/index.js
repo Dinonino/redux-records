@@ -19,7 +19,7 @@ export const stateSelector = ({ storeKey, dataKey, ID }) => (state) => {
     state[storeKey] &&
     state[storeKey][dataKey] &&
     state[storeKey][dataKey][STORE_PATH.STATE];
-  return data && ID ? data[ID] : data;
+  return data && ID ? data[STORE_PATH.ENTITIES_STATE][ID] : data;
 };
 
 export const actionsSelector = ({ storeKey, dataKey, ID }) =>
