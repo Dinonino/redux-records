@@ -11,14 +11,14 @@ export const STORE_PATH = {
   },
 };
 
-export const ENTITY_STATE = {
+export const ENTITY_STATUS = {
   SYNCED: 'SYNCED',
   SYNC_FAILED: 'SYNC_FAILED',
   SYNCING: 'SYNCING',
   OUT_OF_SYNC: 'OUT_OF_SYNC',
 };
 
-export const ENTITY_STATUS = {
+export const ENTITY_STATE = {
   NEW: 'NEW',
   EXISTING: 'EXISTING',
   ID_UPDATED: 'ID_UPDATED',

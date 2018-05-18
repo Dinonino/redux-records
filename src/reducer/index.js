@@ -1,4 +1,4 @@
-import { STORE_PATH, ACTION, ENTITY_STATE, STORE_KEY } from './constants';
+import { STORE_PATH, ACTION, ENTITY_STATUS, STORE_KEY, ENTITY_STATE } from './constants';
 import { constantsFactory, CONSTANTS_REGEX } from '../actions';
 
 const mergeEntities = (previousEntities, newEntities, id) => {
@@ -35,30 +35,28 @@ const reducerFactory = ({ ID, dataID }) => {
   return (state = initialState, { type, payload }) => {
     const newState = { ...state };
     const { entity: { [dataID]: id = '', ...data } = {}, entityId } = payload || {};
+
     const stateId = id || entityId;
     const filterId = entityId || id;
+
     const entity = state[STORE_PATH.DATA].find(el => el[dataID] === filterId);
-    if (Object.keys(data).length &&
-      !state[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][stateId]) {
-      newState[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][stateId] = {
-        ACTIONS: [],
-      };
-    }
-    const entityState = state[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][stateId];
+
+    let entityState = state[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][filterId];
 
     const globalState = state[STORE_PATH.STATE];
+
     switch (type) {
       case CONSTANTS.DELETE:
       case CONSTANTS.DELETE_SYNC:
         if (entityState.ACTIONS[entityState.HISTORY_INDEX].ACTION !== ACTION.DELETE) {
           newState[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity !== el);
-          entityState.STATE = type === CONSTANTS.DELETE ?
-            ENTITY_STATE.OUT_OF_SYNC :
-            ENTITY_STATE.SYNCING;
+          entityState.STATUS = type === CONSTANTS.DELETE ?
+            ENTITY_STATUS.OUT_OF_SYNC :
+            ENTITY_STATUS.SYNCING;
 
           if (entityState.ACTIONS.length &&
             entityState.ACTIONS.length > (entityState.HISTORY_INDEX + 1)) {
-            entityState.ACTIONS.splice(state.HISTORY_INDEX);
+            entityState.ACTIONS.splice(state.HISTORY_INDEX + 1);
           }
           if (entityState.ACTIONS.length) {
             entityState.ACTIONS[entityState.HISTORY_INDEX].SNAPSHOT = entity;
@@ -68,45 +66,50 @@ const reducerFactory = ({ ID, dataID }) => {
         }
         return newState;
       case CONSTANTS.DELETE_FAILED:
-        entityState.STATE = ENTITY_STATE.SYNC_FAILED;
+        entityState.STATUS = ENTITY_STATUS.SYNC_FAILED;
         entityState.SYNC_MSG = payload.error;
         return newState;
       case CONSTANTS.DELETE_SUCCEEDED:
-        entityState.STATE = ENTITY_STATE.SYNCED;
+        entityState.STATUS = ENTITY_STATUS.SYNCED;
         entityState.SYNC_MSG = '';
         entityState.ACTIONS = [];
         entityState.HISTORY_INDEX = undefined;
-        break;
+        return newState;
       case CONSTANTS.LOAD:
-        globalState.STATE = ENTITY_STATE.SYNCING;
+        globalState.STATUS = ENTITY_STATUS.SYNCING;
         return newState;
       case CONSTANTS.LOAD_FAILED:
-        globalState.STATE = ENTITY_STATE.SYNC_FAILED;
+        globalState.STATE = ENTITY_STATUS.SYNC_FAILED;
         globalState.SYNC_MSG = payload.error;
         return newState;
       case CONSTANTS.LOAD_SUCCEEDED:
         newState[STORE_PATH.DATA] = mergeEntities(state[STORE_PATH.DATA], payload);
-        globalState.STATE = ENTITY_STATE.SYNCED;
+        globalState.STATE = ENTITY_STATUS.SYNCED;
         globalState.SYNC_MSG = '';
         return newState;
       case CONSTANTS.UPDATE:
       case CONSTANTS.UPDATE_SYNC:
         if (Object.keys(data).length) {
+          if (!state[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][stateId]) {
+            newState[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][stateId] = {
+              ACTIONS: [],
+              STATE: !id ?
+                ENTITY_STATE.NEW :
+                ENTITY_STATE.EXISTING,
+            };
+            entityState = state[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][stateId];
+          }
+
           newState[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity !== el);
           newState[STORE_PATH.DATA].push({ ...data, [dataID]: stateId });
-          if (!entityState.STATE) {
-            if (type === CONSTANTS.UPDATE_SYNC) {
-              entityState.STATE = ENTITY_STATE.SYNCING;
-            } else {
-              entityState.STATE = !id ?
-                ENTITY_STATE.NEW :
-                ENTITY_STATE.OUT_OF_SYNC;
-            }
-          }
+
+          entityState.STATUS = type === CONSTANTS.UPDATE_SYNC ?
+            ENTITY_STATUS.SYNCING :
+            ENTITY_STATUS.OUT_OF_SYNC;
 
           if (entityState.ACTIONS.length &&
             entityState.ACTIONS.length > (entityState.HISTORY_INDEX + 1)) {
-            entityState.ACTIONS.splice(entityState.HISTORY_INDEX);
+            entityState.ACTIONS.splice(entityState.HISTORY_INDEX + 1);
           }
           if (entityState.ACTIONS.length) {
             entityState.ACTIONS[entityState.HISTORY_INDEX].SNAPSHOT = entity;
@@ -116,30 +119,29 @@ const reducerFactory = ({ ID, dataID }) => {
         }
         return newState;
       case CONSTANTS.UPDATE_FAILED:
-        entityState.STATE = ENTITY_STATE.SYNC_FAILED;
+        entityState.STATUS = ENTITY_STATUS.SYNC_FAILED;
         entityState.SYNC_MSG = payload.error;
         return newState;
       case CONSTANTS.UPDATE_SUCCEEDED:
         newState[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity !== el);
         newState[STORE_PATH.DATA].push({ ...data, [dataID]: id });
 
-        entityState.STATE = ENTITY_STATE.SYNCED;
+        entityState.STATUS = ENTITY_STATUS.SYNCED;
         entityState.SYNC_MSG = '';
         entityState.ACTIONS = [];
         entityState.HISTORY_INDEX = undefined;
-        newState[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][id] = {
-          STATE: ENTITY_STATE.SYNCED,
-          SYNC_MSG: '',
-          ACTIONS: [],
-        };
 
-        if (entityId) {
-          newState[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][entityId] = {
-            STATE: ENTITY_STATE.ID_UPDATED,
-            UPDATED_ID: id,
+        if (entityState.STATE === ENTITY_STATE.NEW && id) {
+          newState[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][id] = {
+            ...entityState,
+            STATE: ENTITY_STATE.EXISTING,
           };
+          entityState.STATE = ENTITY_STATE.ID_UPDATED;
+          entityState.UPDATED_ID = id;
+        } else {
+          entityState.STATE = ENTITY_STATE.EXISTING;
         }
-        break;
+        return newState;
       case CONSTANTS.REDO:
         if (entityState.ACTIONS.length &&
           entityState.ACTIONS.length > (entityState.HISTORY_INDEX + 1)) {
@@ -169,7 +171,6 @@ const reducerFactory = ({ ID, dataID }) => {
       default:
         return state;
     }
-    return state;
   };
 };
 
@@ -194,4 +195,4 @@ export const reducersFactory = () => {
 
 export default reducersFactory;
 
-export { STORE_PATH, ACTION, ENTITY_STATE, STORE_KEY };
+export { STORE_PATH, ACTION, ENTITY_STATUS, STORE_KEY };
