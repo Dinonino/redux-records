@@ -5,7 +5,11 @@
   "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "compile": "babel src --out-dir lib",
+    "build": "babel src --out-dir lib",
+    "build:dev": "npm run prebuild && babel src --out-dir lib --source-maps inline",
+    "clean": "rm -rf lib",
+    "init": "mkdir lib",
+    "prebuild": "npm run clean && npm run init",
     "prepublishOnly": "npm run compile"
   },
   "repository": {

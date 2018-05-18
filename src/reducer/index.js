@@ -38,7 +38,8 @@ const reducerFactory = ({ ID, dataID }) => {
     const stateId = id || entityId;
     const filterId = entityId || id;
     const entity = state[STORE_PATH.DATA].find(el => el[dataID] === filterId);
-    if (Object.keys(data).length && !state[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][stateId]) {
+    if (Object.keys(data).length &&
+      !state[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][stateId]) {
       newState[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][stateId] = {
         ACTIONS: [],
       };
