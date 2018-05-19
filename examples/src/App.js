@@ -1,6 +1,6 @@
 import React from 'react';
 import { Provider } from 'react-redux';
-import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Link, Switch } from 'react-router-dom';
 import { Container, Image, Menu } from 'semantic-ui-react';
 import Basic from './scenes/basic';
 import ListComp from './scenes/basic/list';
@@ -31,9 +31,11 @@ const App = () => (
         </Menu>
 
         <Container text style={{ marginTop: '7em' }}>
-          <Route exact path="/list" component={ListComp} />
-          <Route exact path="/advanced" component={Advanced} />
-          <Route exact path="/edit/:id?" component={Basic} />
+          <Switch>
+            <Route exact path="/list" component={ListComp} />
+            <Route exact path="/advanced" component={Advanced} />
+            <Route exact path="/edit/:id?" component={Basic} />
+          </Switch>
         </Container>
       </div>
     </Router>

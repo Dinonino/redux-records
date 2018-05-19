@@ -26,10 +26,16 @@ export const actionsSelector = ({ storeKey, dataKey, ID }) =>
   state =>
     Object
       .entries(state[storeKey])
-      .reduce((acc, [key, { [STORE_PATH.STATE]: entitiesState = [] }]) => {
+      .reduce((acc, [key,
+        {
+          [STORE_PATH.STATE]: {
+            [STORE_PATH.ENTITIES_STATE]: entitiesState = [],
+          } = {},
+        }]) => {
         if (!dataKey || dataKey === key) {
           const actions = ID ? [entitiesState[ID]] : Object.values(entitiesState);
-          return acc.concat(actions.map(({ ACTIONS, HISTORY_INDEX }) => ACTIONS[HISTORY_INDEX]));
+          return acc.concat(actions.map(({ ACTIONS, HISTORY_INDEX, STATE }) =>
+            ({ ...ACTIONS[HISTORY_INDEX], STATE })));
         }
         return acc;
       }, []);

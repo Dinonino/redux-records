@@ -12,8 +12,8 @@ import actionsFactory from '../actions/index';
  * @returns {string} GUID string
  */
 const getGUID = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-  let r = Math.random() * 16 | 0,
-    v = c === 'x' ? r : (r & 0x3 | 0x8);
+  const r = Math.random() * 16 | 0;// eslint-disable-line no-bitwise
+  const v = c === 'x' ? r : (r & 0x3 | 0x8);// eslint-disable-line no-bitwise
   return v.toString(16);
 });
 
@@ -101,7 +101,11 @@ const dataContainer = (config, mapStateToProps) => {
     for (let index = 0; index < configurations.length; index += 1) {
       const element = configurations[index];
       const { dataKey } = element;
-      data[dataKey] = entityMapStateToProps(state, ownProps, { ...element, tempId: tempId[dataKey] });
+      data[dataKey] = entityMapStateToProps(
+        state,
+        ownProps,
+        { ...element, tempId: tempId[dataKey] },
+      );
     }
     if (mapStateToProps) {
       return {
