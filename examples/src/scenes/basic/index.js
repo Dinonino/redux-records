@@ -3,6 +3,7 @@ import { compose } from 'redux';
 import { dataContainer } from 'redux-records';
 import { Field, reduxForm } from 'redux-form';
 import { Button, Form, Menu } from 'semantic-ui-react';
+import { withRouter } from 'react-router-dom';
 
 const basicScreen = (props) => {
   const {
@@ -67,6 +68,7 @@ const basicScreen = (props) => {
 };
 
 export default compose(
+  withRouter,
   dataContainer(
     {
       dataKey: 'USERS',

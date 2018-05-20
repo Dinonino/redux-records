@@ -19,10 +19,12 @@ const handleActionFactory = (options, dispatch) =>
       try {
         const resultPromise = options[actionKey](payload);
         if (isPromise(resultPromise)) {
-          resultPromise.then((result) => {
-            dispatch(actionSucceeded(result));
+          resultPromise.then(result => {
+            return result;
           }, (error) => {
             dispatch(actionFailed(error));
+          }).then((resolvedResponse) => {
+            dispatch(actionSucceeded(resolvedResponse));
           });
         } else {
           dispatch(actionFailed('Invalid method implementation'));
@@ -53,16 +55,17 @@ const handleDeleteFailed = (id, deleteFailedAction) =>
     deleteFailedAction(id, payload);
 
 const handleStateActionFactory = ({ handler, actionCreators, dataID }) =>
-  ({ ACTION: type, PAYLOAD: { entity: { [dataID]: id, ...entityData } }, STATE }) => {
-    const payload = { ...entityData };
+  ({ ACTION: type, PAYLOAD: payload, STATE }) => {
+    const { entity: { [dataID]: id, ...entityData } = {} } = payload;
+    const entity = { ...entityData };
     if (STATE !== ENTITY_STATE.NEW) {
-      payload[dataID] = id;
+      entity[dataID] = id;
     }
     switch (type) {
       case ACTION.DELETE:
         handler({
           actionKey: 'delete',
-          payload,
+          payload: entity,
           actionSucceeded: handleDeleteSuccess(id, actionCreators.deleteSucceededAction),
           actionFailed: handleDeleteFailed(id, actionCreators.deleteFailedAction),
         });
@@ -70,9 +73,17 @@ const handleStateActionFactory = ({ handler, actionCreators, dataID }) =>
       case ACTION.UPDATE:
         handler({
           actionKey: 'update',
-          payload,
+          payload: entity,
           actionSucceeded: handleUpdateSuccess(id, actionCreators.updateSucceededAction),
           actionFailed: handleUpdateFailed(id, actionCreators.updateFailedAction),
+        });
+        break;
+      case ACTION.LOAD:
+        handler({
+          actionKey: 'load',
+          payload,
+          actionSucceeded: actionCreators.loadSucceededAction,
+          actionFailed: actionCreators.loadFailedAction,
         });
         break;
       default:
@@ -103,13 +114,8 @@ const apiMiddleware = ({ storeKey = STORE_KEY, endpoints = {} }) =>
               ID: entityId || (entity && entity[dataID]),
             })(getState())[0];
             handleStateAction(stateAction);
-          } else if (constants.LOAD_SYNC.test(type)) {
-            handler({
-              actionKey: 'load',
-              payload,
-              actionSucceeded: actionCreators.loadSucceededAction,
-              actionFailed: actionCreators.loadFailedAction,
-            });
+          } else if (constants.LOAD.test(type)) {
+            handleStateAction({ ACTION: ACTION.LOAD, PAYLOAD: payload });
           } else if (constants.SYNC_ALL.test(type)) {
             const actions = actionsSelector({ storeKey, dataKey })(getState());
             for (let index = 0; index < actions.length; index += 1) {

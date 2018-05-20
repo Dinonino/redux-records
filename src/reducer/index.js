@@ -22,7 +22,6 @@ const mergeEntities = (previousEntities, newEntities, id) => {
   return retValue;
 };
 
-
 const reducerFactory = ({ ID, dataID }) => {
   const CONSTANTS = constantsFactory(ID);
   const initialState = {
@@ -83,7 +82,18 @@ const reducerFactory = ({ ID, dataID }) => {
         globalState.SYNC_MSG = payload.error;
         return newState;
       case CONSTANTS.LOAD_SUCCEEDED:
-        newState[STORE_PATH.DATA] = mergeEntities(state[STORE_PATH.DATA], payload);
+        newState[STORE_PATH.DATA] = mergeEntities(state[STORE_PATH.DATA], payload, dataID);
+        newState[STORE_PATH.DATA].forEach(({ [dataID]: elemId }) => {
+          if (!newState[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][elemId]) {
+            newState[STORE_PATH.STATE][STORE_PATH.ENTITIES_STATE][elemId] = {
+              STATUS: ENTITY_STATUS.SYNCED,
+              SYNC_MSG: '',
+              ACTIONS: [],
+              HISTORY_INDEX: undefined,
+              STATE: ENTITY_STATE.EXISTING,
+            };
+          }
+        });
         globalState.STATE = ENTITY_STATUS.SYNCED;
         globalState.SYNC_MSG = '';
         return newState;

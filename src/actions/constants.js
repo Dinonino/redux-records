@@ -3,7 +3,6 @@ export const ID = '$$RRECORDS';
 const escapeRegExp = text => text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
 
 export const LOAD = new RegExp(`${escapeRegExp(ID)}/(\\w+)/LOAD`);
-export const LOAD_SYNC = new RegExp(`${escapeRegExp(ID)}/(\\w+)/LOAD_SYNC`);
 export const LOAD_FAILED = new RegExp(`${escapeRegExp(ID)}/(\\w+)/LOAD_FAILED`);
 export const LOAD_SUCCEEDED = new RegExp(`${escapeRegExp(ID)}/(\\w+)/LOAD_SUCCEEDED`);
 export const UPDATE = new RegExp(`${escapeRegExp(ID)}/(\\w+)/UPDATE`);
@@ -25,7 +24,6 @@ export const DATA_ID_EXP = new RegExp(`${escapeRegExp(ID)}/(\\w+)/`);
 
 const constantsFactory = DATA_ID => ({
   LOAD: `${ID}/${DATA_ID}/LOAD`,
-  LOAD_SYNC: `${ID}/${DATA_ID}/LOAD_SYNC`,
   LOAD_FAILED: `${ID}/${DATA_ID}/LOAD_FAILED`,
   LOAD_SUCCEEDED: `${ID}/${DATA_ID}/LOAD_SUCCEEDED`,
   UPDATE: `${ID}/${DATA_ID}/UPDATE`,

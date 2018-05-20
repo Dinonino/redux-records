@@ -27,6 +27,7 @@ export const ENTITY_STATE = {
 export const ACTION = {
   DELETE: 'DELETE',
   UPDATE: 'UPDATE',
+  LOAD: 'LOAD',
 };
 
 export const STORE_KEY = 'RRECORDS';
