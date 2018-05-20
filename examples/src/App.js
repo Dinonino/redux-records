@@ -1,6 +1,7 @@
 import React from 'react';
 import { Provider } from 'react-redux';
-import { BrowserRouter as Router, Route, Link, Switch } from 'react-router-dom';
+import { createBrowserHistory as createHistory } from 'history';
+import { Router, Route, Link, Switch } from 'react-router-dom';
 import { Container, Image, Menu } from 'semantic-ui-react';
 import Basic from './scenes/basic';
 import ListComp from './scenes/basic/list';
@@ -9,10 +10,11 @@ import logo from './logo.svg';
 import './App.css';
 import store from './store';
 
+export const history = createHistory();
 const App = () => (
   <Provider store={store}>
 
-    <Router>
+    <Router history={history}>
       <div>
         <Menu fixed="top" inverted>
           <Container>

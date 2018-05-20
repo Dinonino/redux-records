@@ -47,7 +47,8 @@ const reducerFactory = ({ ID, dataID }) => {
     switch (type) {
       case CONSTANTS.DELETE:
       case CONSTANTS.DELETE_SYNC:
-        if (entityState.ACTIONS[entityState.HISTORY_INDEX].ACTION !== ACTION.DELETE) {
+        if (!entityState.HISTORY_INDEX ||
+          entityState.ACTIONS[entityState.HISTORY_INDEX].ACTION !== ACTION.DELETE) {
           newState[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity !== el);
           entityState.STATUS = type === CONSTANTS.DELETE ?
             ENTITY_STATUS.OUT_OF_SYNC :
@@ -70,6 +71,7 @@ const reducerFactory = ({ ID, dataID }) => {
         return newState;
       case CONSTANTS.DELETE_SUCCEEDED:
         entityState.STATUS = ENTITY_STATUS.SYNCED;
+        entityState.STATE = ENTITY_STATE.DELETED;
         entityState.SYNC_MSG = '';
         entityState.ACTIONS = [];
         entityState.HISTORY_INDEX = undefined;

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { compose, bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { STORE_KEY } from '../reducer/constants';
+import { STORE_KEY, ENTITY_STATE } from '../reducer/constants';
 import { stateSelector, dataSelector } from '../selectors';
 import actionsFactory from '../actions/index';
 
@@ -13,7 +13,7 @@ import actionsFactory from '../actions/index';
  */
 const getGUID = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
   const r = Math.random() * 16 | 0;// eslint-disable-line no-bitwise
-  const v = c === 'x' ? r : (r & 0x3 | 0x8);// eslint-disable-line no-bitwise
+  const v = c === 'x' ? r : ((r & 0x3) | 0x8);// eslint-disable-line no-bitwise
   return v.toString(16);
 });
 
@@ -50,14 +50,19 @@ const entityMapStateToProps = (state, ownProps, {
   dataKey,
   ID,
   mapStateToProps,
-  tempId,
+  onIdUpdated,
 }) => {
-  const entityID = tempId ||
-    (ID instanceof Function ? ID(ownProps) : ID);
+  const entityID = (ID instanceof Function ? ID(ownProps) : ID);
   const data = dataSelector({
     storeKey, dataKey, ID: entityID,
   })(state);
   const dataState = stateSelector({ storeKey, dataKey, ID: entityID })(state);
+  if (dataState &&
+    dataState.STATE === ENTITY_STATE.ID_UPDATED &&
+    onIdUpdated &&
+    (onIdUpdated instanceof Function)) {
+    onIdUpdated(entityID, dataState.UPDATED_ID);
+  }
   const props = !mapStateToProps ? {} : mapStateToProps(state, data, dataState);
   return {
     data,
@@ -95,7 +100,6 @@ const calculateConfig = (config) => {
 
 const dataContainer = (config, mapStateToProps) => {
   const configurations = calculateConfig(config);
-  const tempId = {};
   const mapProps = (state, ownProps) => {
     const data = {};
     for (let index = 0; index < configurations.length; index += 1) {
@@ -104,7 +108,7 @@ const dataContainer = (config, mapStateToProps) => {
       data[dataKey] = entityMapStateToProps(
         state,
         ownProps,
-        { ...element, tempId: tempId[dataKey] },
+        element,
       );
     }
     if (mapStateToProps) {
@@ -119,7 +123,7 @@ const dataContainer = (config, mapStateToProps) => {
   const mapActions = (dispatch) => {
     const mappedActions = {};
     for (let index = 0; index < configurations.length; index += 1) {
-      const { dataKey } = configurations[index];
+      const { dataKey, onIdUpdated } = configurations[index];
       const actions = bindActionCreators(actionsFactory(dataKey), dispatch);
       mappedActions[dataKey] = {
         ...actions,
@@ -127,16 +131,22 @@ const dataContainer = (config, mapStateToProps) => {
           if (id) {
             actions.updateAction({ id, ...entity });
           } else {
-            tempId[dataKey] = tempId[dataKey] || getGUID();
-            actions.updateAction(entity, tempId[dataKey]);
+            const tempId = getGUID();
+            actions.updateAction(entity, tempId);
+            if (onIdUpdated && (onIdUpdated instanceof Function)) {
+              onIdUpdated(null, tempId);
+            }
           }
         },
         updateSyncAction: ({ id, ...entity }) => {
           if (id) {
             actions.updateSyncAction({ id, ...entity });
           } else {
-            tempId[dataKey] = tempId[dataKey] || getGUID();
-            actions.updateSyncAction(entity, tempId[dataKey]);
+            const tempId = getGUID();
+            actions.updateSyncAction(entity, tempId);
+            if (onIdUpdated && (onIdUpdated instanceof Function)) {
+              onIdUpdated(null, tempId);
+            }
           }
         },
       };

@@ -19,9 +19,7 @@ const handleActionFactory = (options, dispatch) =>
       try {
         const resultPromise = options[actionKey](payload);
         if (isPromise(resultPromise)) {
-          resultPromise.then(result => {
-            return result;
-          }, (error) => {
+          resultPromise.then(result => result, (error) => {
             dispatch(actionFailed(error));
           }).then((resolvedResponse) => {
             dispatch(actionSucceeded(resolvedResponse));
@@ -56,8 +54,9 @@ const handleDeleteFailed = (id, deleteFailedAction) =>
 
 const handleStateActionFactory = ({ handler, actionCreators, dataID }) =>
   ({ ACTION: type, PAYLOAD: payload, STATE }) => {
-    const { entity: { [dataID]: id, ...entityData } = {} } = payload;
+    const { entity: { [dataID]: currentId, ...entityData } = {}, entityId } = payload;
     const entity = { ...entityData };
+    const id = currentId || entityId;
     if (STATE !== ENTITY_STATE.NEW) {
       entity[dataID] = id;
     }

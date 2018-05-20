@@ -10,7 +10,8 @@
     "clean": "rm -rf lib",
     "init": "mkdir lib",
     "prebuild": "npm run clean && npm run init",
-    "prepublishOnly": "npm run compile"
+    "prepublishOnly": "npm run compile",
+    "lint": "eslint ."
   },
   "repository": {
     "type": "git",

@@ -22,6 +22,7 @@ export const ENTITY_STATE = {
   NEW: 'NEW',
   EXISTING: 'EXISTING',
   ID_UPDATED: 'ID_UPDATED',
+  DELETED: 'DELETED',
 };
 
 export const ACTION = {

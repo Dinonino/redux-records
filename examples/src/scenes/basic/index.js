@@ -4,6 +4,7 @@ import { dataContainer } from 'redux-records';
 import { Field, reduxForm } from 'redux-form';
 import { Button, Form, Menu } from 'semantic-ui-react';
 import { withRouter } from 'react-router-dom';
+import { history } from '../../App';
 
 const basicScreen = (props) => {
   const {
@@ -74,6 +75,7 @@ export default compose(
       dataKey: 'USERS',
       dataID: 'id',
       ID: ({ match: { params: { id } = {} } = {} }) => id,
+      onIdUpdated: (prevId, newId) => { history.push(`/edit/${newId}`) }
     },
     (state, { USERS: { data } = {} }) =>
       ({ initialValues: data && !data.length && Object.keys(data).length ? data : undefined }),
