@@ -1,11 +1,23 @@
 import React from 'react';
 import { compose } from 'redux';
-import { dataContainer } from 'redux-records';
 import { Table, Button } from 'semantic-ui-react';
 import { Link, withRouter } from 'react-router-dom';
+import dataContainer from '../../components/datacontainer';
 
 const listScreen = (props) => {
-  const { USERS: { data = [], actions: { deleteAction, loadAction } } = {} } = props;
+  const {
+    rr_data: {
+      USERS: {
+        data = []
+      } = {},
+    } = {},
+    rr_actions: {
+      USERS: {
+        deleteAction,
+        loadAction
+      } = {},
+    } = {},
+  } = props;
   return (
     <div>
       <Table attached>

@@ -47,8 +47,6 @@
     "webpack": "^4.6.0"
   },
   "peerDependencies": {
-    "react": ">=14.0.0",
-    "react-redux": ">=3.0.7",
     "redux": ">=2.0.0"
   },
   "dependencies": {

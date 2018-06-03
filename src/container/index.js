@@ -1,6 +1,4 @@
-import React, { Component } from 'react';
-import { compose, bindActionCreators } from 'redux';
-import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
 import { STORE_KEY, ENTITY_STATE } from '../reducer/constants';
 import { stateSelector, dataSelector } from '../selectors';
 import actionsFactory from '../actions/index';
@@ -17,33 +15,6 @@ const getGUID = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c
   return v.toString(16);
 });
 
-
-const DataContainerHOC = entities =>
-  WrappedComponent => class DataContainer extends Component {
-    componentWillMount() {
-      for (let index = 0; index < entities.length; index += 1) {
-        const { dataID, dataKey } = entities[index];
-        const { [dataKey]: { actions: { initializeStore } = {} } = {} } = this.props;
-        initializeStore(dataID);
-      }
-    }
-
-    componentWillUnmount() {
-      for (let index = 0; index < entities.length; index += 1) {
-        const { destroyOnUnmount, dataKey } = entities[index];
-        const { [dataKey]: { actions: { destructStore } = {} } = {} } = this.props;
-        if (destroyOnUnmount) {
-          destructStore();
-        }
-      }
-    }
-
-    render() {
-      return (<WrappedComponent
-        {...this.props}
-      />);
-    }
-  };
 
 const entityMapStateToProps = (state, ownProps, {
   storeKey = STORE_KEY,
@@ -98,7 +69,7 @@ const calculateConfig = (config) => {
   return calcConfig;
 };
 
-const dataContainer = (config, mapStateToProps) => {
+const dataContainer = (connect, config, mapStateToProps) => {
   const configurations = calculateConfig(config);
   const mapProps = (state, ownProps) => {
     const data = {};
@@ -117,14 +88,22 @@ const dataContainer = (config, mapStateToProps) => {
         ...mapStateToProps(state, data),
       };
     }
-    return { data };
+    return { rr_data: data };
   };
 
   const mapActions = (dispatch) => {
     const mappedActions = {};
+    const onMount = [];
+    const onUnmount = [];
     for (let index = 0; index < configurations.length; index += 1) {
-      const { dataKey, onIdUpdated } = configurations[index];
+      const {
+        dataKey, onIdUpdated, dataID, destroyOnUnmount,
+      } = configurations[index];
       const actions = bindActionCreators(actionsFactory(dataKey), dispatch);
+      onMount.push(() => actions.initializeStore(dataID));
+      if (destroyOnUnmount) {
+        onUnmount.push(() => actions.destructStore());
+      }
       mappedActions[dataKey] = {
         ...actions,
         updateAction: ({ id, ...entity }) => {
@@ -151,30 +130,20 @@ const dataContainer = (config, mapStateToProps) => {
         },
       };
     }
-    return mappedActions;
+    return {
+      rr_actions: {
+        ...mappedActions,
+        onMount: () => {
+          onMount.forEach(onMntFnc => onMntFnc());
+        },
+        onUnmount: () => {
+          onUnmount.forEach(onUnMntFnc => onUnMntFnc());
+        },
+      },
+    };
   };
 
-  const mergeProps = ({ data, ...restOfData }, actions, ownProps) => {
-    const entities = {};
-    for (let index = 0; index < configurations.length; index += 1) {
-      const { dataKey } = configurations[index];
-      entities[dataKey] = {
-        data: data[dataKey].data,
-        state: data[dataKey].state,
-        actions: actions[dataKey],
-      };
-    }
-    return { ...entities, ...restOfData, ...ownProps };
-  };
-
-  return compose(
-    connect(
-      mapProps,
-      mapActions,
-      mergeProps,
-    ),
-    DataContainerHOC(configurations),
-  );
+  return connect(mapProps, mapActions);
 };
 
 

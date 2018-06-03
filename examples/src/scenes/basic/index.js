@@ -1,17 +1,26 @@
 import React from 'react';
 import { compose } from 'redux';
-import { dataContainer } from 'redux-records';
 import { Field, reduxForm } from 'redux-form';
 import { Button, Form, Menu } from 'semantic-ui-react';
 import { withRouter } from 'react-router-dom';
 import { history } from '../../App';
+import dataContainer from '../../components/datacontainer';
 
 const basicScreen = (props) => {
   const {
-    handleSubmit, USERS: {
-      data,
-      actions: {
-        updateAction, undoAction, redoAction, discardAction, updateSyncAction,
+    handleSubmit,
+    rr_data: {
+      USERS: {
+        data,
+      } = {}
+    } = {},
+    rr_actions: {
+      USERS: {
+        updateAction,
+        undoAction,
+        redoAction,
+        discardAction,
+        updateSyncAction,
       } = {},
     } = {},
   } = props;
