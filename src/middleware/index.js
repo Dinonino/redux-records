@@ -66,7 +66,7 @@ const handleStateActionFactory = ({
   dataKey,
   ID,
   loadPayload,
-}) => {
+}) => () => {
   const actionCreators = actionsFactory(dataKey);
   const stateAction = loadPayload ? {
     ACTION: ACTION.LOAD,
@@ -93,47 +93,37 @@ const handleStateActionFactory = ({
   }
   switch (type) {
     case ACTION.DELETE:
-      return {
-        dataKey,
-        action: () => handler({
-          actionKey: 'delete',
-          payload: entity,
-          actionSucceeded: handleDeleteSuccess(id, actionCreators.deleteSucceededAction),
-          actionFailed: handleDeleteFailed(id, actionCreators.deleteFailedAction),
-        }),
-      };
+      return handler({
+        actionKey: 'delete',
+        payload: entity,
+        actionSucceeded: handleDeleteSuccess(id, actionCreators.deleteSucceededAction),
+        actionFailed: handleDeleteFailed(id, actionCreators.deleteFailedAction),
+      });
     case ACTION.UPDATE:
-      return {
-        dataKey,
-        action: () => handler({
-          actionKey: 'update',
-          payload: entity,
-          actionSucceeded: handleUpdateSuccess(id, actionCreators.updateSucceededAction),
-          actionFailed: handleUpdateFailed(id, actionCreators.updateFailedAction),
-        }),
-      };
+      return handler({
+        actionKey: 'update',
+        payload: entity,
+        actionSucceeded: handleUpdateSuccess(id, actionCreators.updateSucceededAction),
+        actionFailed: handleUpdateFailed(id, actionCreators.updateFailedAction),
+      });
     case ACTION.LOAD:
-      return {
-        dataKey,
-        action: () => handler({
-          actionKey: 'load',
-          payload,
-          actionSucceeded: actionCreators.loadSucceededAction,
-          actionFailed: actionCreators.loadFailedAction,
-        }),
-      };
+      return handler({
+        actionKey: 'load',
+        payload,
+        actionSucceeded: actionCreators.loadSucceededAction,
+        actionFailed: actionCreators.loadFailedAction,
+      });
     default:
-      return {
-        dataKey,
-        action: () => Promise.reject(new Error('Unhandled action')),
-      };
+      return Promise.reject(new Error('Unhandled action'));
   }
 };
 
 const handleStatesActionFactory = props =>
   (actionProps) => {
-    const actions = actionProps.map(actionProp =>
-      handleStateActionFactory({ ...props, ...actionProp }));
+    const actions = actionProps.map(({ dataKey, ...actionProp }) => ({
+      dataKey,
+      action: handleStateActionFactory({ ...props, ...actionProp, dataKey }),
+    }));
     actions.forEach(({ action }) => {
       action();
     });
