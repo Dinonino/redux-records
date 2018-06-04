@@ -22,10 +22,11 @@ const mergeEntities = (previousEntities, newEntities, id) => {
   return retValue;
 };
 
-const reducerFactory = ({ ID, dataID }) => {
+const reducerFactory = ({ ID, dataID, relations }) => {
   const CONSTANTS = constantsFactory(ID);
   const initialState = {
     [STORE_PATH.KEY]: dataID,
+    [STORE_PATH.RELATIONS]: relations,
     [STORE_PATH.DATA]: [],
     [STORE_PATH.STATE]: {
       [STORE_PATH.ENTITIES_STATE]: {},
@@ -189,11 +190,11 @@ const reducerFactory = ({ ID, dataID }) => {
 export const reducersFactory = () => {
   const dataState = {};
   return (state = {}, action) => {
-    const { type, payload: { dataID } = {} } = action;
+    const { type, payload: { dataID, relations } = {} } = action;
     if (type.startsWith(CONSTANTS_REGEX.ID)) {
       const ID = CONSTANTS_REGEX.DATA_ID_EXP.exec(type)[1];
       if (CONSTANTS_REGEX.INITIALIZE.test(type) && !dataState[ID]) {
-        dataState[ID] = reducerFactory({ ID, dataID });
+        dataState[ID] = reducerFactory({ ID, dataID, relations });
       } else if (CONSTANTS_REGEX.DESTRUCT.test(type)) {
         delete dataState[ID];
         const { [ID]: deletedID, ...newState } = state;

@@ -30,7 +30,8 @@ const actionsFactory = (dataKey) => {
 
   const syncAllAction = () => ({ type: constants.SYNC_ALL });
 
-  const initializeStore = dataID => ({ type: constants.INITIALIZE, payload: { dataID } });
+  const initializeStore = (dataID, relations) =>
+    ({ type: constants.INITIALIZE, payload: { dataID, relations } });
   const destructStore = () => ({ type: constants.DESTRUCT });
 
   return {

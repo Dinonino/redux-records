@@ -1,7 +1,7 @@
 import { ACTION, STORE_KEY, ENTITY_STATE } from '../reducer/constants';
 import * as constants from '../actions/constants';
 import actionsFactory from '../actions';
-import { actionsSelector, dataIDSelector } from '../selectors';
+import { actionsSelector, dataIDSelector, relationsSelector, stateSelector } from '../selectors';
 
 const isPromise = obj => !!obj &&
   (typeof obj === 'object' || typeof obj === 'function') &&
@@ -57,6 +57,31 @@ const handleDeleteSuccess = (id, deleteSucceededAction) =>
 const handleDeleteFailed = (id, deleteFailedAction) =>
   payload =>
     deleteFailedAction(id, payload);
+
+const resolveRelations = (allActions) => {
+  const sorted = [];
+  const visited = {};
+
+  const visit = (dataKey, ancestors) => {
+    if (!Array.isArray(ancestors)) ancestors = [];
+    ancestors.push(dataKey);
+    visited[dataKey] = true;
+    Object.values(allActions[dataKey].relations || []).forEach((foreignDataKey) => {
+      if (ancestors.includes(foreignDataKey)) {
+        throw new Error(`Circular dependency "${foreignDataKey}" is required by "${dataKey}": ${ancestors.join(' -> ')}`);
+      }
+      // if already exists, do nothing
+      if (visited[dataKey]) {
+        return;
+      }
+      visit(foreignDataKey, [...ancestors]);
+    });
+    sorted.push(allActions[dataKey].actions);
+  };
+
+  Object.keys(allActions).forEach(visit);
+  return sorted;
+};
 const handleStateActionFactory = ({
   getState,
   storeKey,
@@ -65,6 +90,7 @@ const handleStateActionFactory = ({
   recordKey,
   dataKey,
   ID,
+  relations = {},
   loadPayload,
 }) => () => {
   const actionCreators = actionsFactory(dataKey);
@@ -91,6 +117,14 @@ const handleStateActionFactory = ({
   if (STATE !== ENTITY_STATE.NEW) {
     entity[recordKey] = id;
   }
+  const updatedIds = Object.entries(relations).reduce((acc, [prop, foreignDataKey]) => {
+    const { STATE: propState, UPDATED_ID: propUpdatedId } =
+      stateSelector({ storeKey, dataKey: foreignDataKey, ID: entity[prop] })(getState());
+    if (propState === ENTITY_STATE.ID_UPDATED) {
+      acc[prop] = propUpdatedId;
+    }
+    return acc;
+  }, {});
   switch (type) {
     case ACTION.DELETE:
       return handler({
@@ -102,7 +136,7 @@ const handleStateActionFactory = ({
     case ACTION.UPDATE:
       return handler({
         actionKey: 'update',
-        payload: entity,
+        payload: { ...entity, ...updatedIds },
         actionSucceeded: handleUpdateSuccess(id, actionCreators.updateSucceededAction),
         actionFailed: handleUpdateFailed(id, actionCreators.updateFailedAction),
       });
@@ -119,14 +153,29 @@ const handleStateActionFactory = ({
 };
 
 const handleStatesActionFactory = props =>
-  (actionProps) => {
-    const actions = actionProps.map(({ dataKey, ...actionProp }) => ({
-      dataKey,
-      action: handleStateActionFactory({ ...props, ...actionProp, dataKey }),
-    }));
-    actions.forEach(({ action }) => {
-      action();
-    });
+  (actions) => {
+    // const actions = actionProps.map(({ dataKey, ...actionProp }) => ({
+    //   dataKey,
+    //   action: handleStateActionFactory({
+    //     storeKey,
+    //     ...props,
+    //     ...actionProp,
+    //     dataKey,
+    //     relations,
+    //   }),
+    //   relations,
+    // }));
+    // actions.forEach(({ action }) => {
+    //   action();
+    // });
+    const orderedActions = resolveRelations(actions);
+    return orderedActions.reduce(
+      (chain, dataActions) =>
+        chain.then(() =>
+          Promise.all(dataActions
+            .map(actionProps => handleStateActionFactory({ ...props, ...actionProps })()))),
+      Promise.resolve(),
+    );
   };
 
 const apiMiddleware = ({ storeKey = STORE_KEY, endpoints = {} }) => ({ dispatch, getState }) => {
@@ -145,22 +194,36 @@ const apiMiddleware = ({ storeKey = STORE_KEY, endpoints = {} }) => ({ dispatch,
       if (constants.DELETE_SYNC.test(type) ||
         constants.UPDATE_SYNC.test(type)) {
         const { entity, entityId } = payload;
-        handleStatesAction([{
-          recordKey,
-          dataKey,
-          ID: entityId || (entity && entity[recordKey]),
-        }]);
+        handleStatesAction({
+          [dataKey]: {
+            actions: [{
+              recordKey,
+              dataKey,
+              ID: entityId || (entity && entity[recordKey]),
+            }],
+          },
+        });
       } else if (constants.LOAD.test(type)) {
-        handleStatesAction([{
-          recordKey,
-          dataKey,
-          loadPayload: payload,
-        }]);
+        handleStatesAction({
+          [dataKey]: {
+            actions: [{
+              recordKey,
+              dataKey,
+              loadPayload: payload,
+            }],
+          },
+        });
       } else if (constants.SYNC_ALL.test(type)) {
+        const relations = relationsSelector({ storeKey, dataKey });
         const actions = actionsSelector({ storeKey, dataKey })(getState())
-          .map(({ [recordKey]: ID }) => ({ recordKey, dataKey, ID }));
+          .map(({ [recordKey]: ID }) => ({
+            recordKey,
+            dataKey,
+            ID,
+            relations,
+          }));
 
-        handleStatesAction(actions);
+        handleStatesAction({ [dataKey]: { actions, relations } });
       }
     }
   };

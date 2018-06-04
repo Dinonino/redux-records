@@ -46,3 +46,10 @@ export const dataIDSelector = ({
   state[storeKey] &&
   state[storeKey][dataKey] &&
   state[storeKey][dataKey][STORE_PATH.KEY];
+
+export const relationsSelector = ({
+  storeKey, dataKey,
+}) => state => state &&
+  state[storeKey] &&
+  state[storeKey][dataKey] &&
+  state[storeKey][dataKey][STORE_PATH.RELATIONS];

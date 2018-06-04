@@ -46,7 +46,7 @@ const calculateConfig = (config) => {
   const calcConfig = [];
   if (typeof config === 'string' || config instanceof String) {
     calcConfig.push({
-      storeKey: STORE_KEY, dataID: 'id', dataKey: config, destroyOnUnmount: false,
+      storeKey: STORE_KEY, dataID: 'id', dataKey: config, destroyOnUnmount: false, relations: {},
     });
   } else if (config && typeof config === 'object' && config.constructor === Object) {
     calcConfig.push(config);
@@ -55,7 +55,7 @@ const calculateConfig = (config) => {
       const element = config[index];
       if (typeof element === 'string' || element instanceof String) {
         calcConfig.push({
-          storeKey: STORE_KEY, dataID: 'id', dataKey: element, destroyOnUnmount: false,
+          storeKey: STORE_KEY, dataID: 'id', dataKey: element, destroyOnUnmount: false, relations: {},
         });
       } else if (element && typeof element === 'object' && element.constructor === Object) {
         calcConfig.push(element);
@@ -97,10 +97,10 @@ const dataContainer = (connect, config, mapStateToProps) => {
     const onUnmount = [];
     for (let index = 0; index < configurations.length; index += 1) {
       const {
-        dataKey, onIdUpdated, dataID, destroyOnUnmount,
+        dataKey, onIdUpdated, dataID, destroyOnUnmount, relations,
       } = configurations[index];
       const actions = bindActionCreators(actionsFactory(dataKey), dispatch);
-      onMount.push(() => actions.initializeStore(dataID));
+      onMount.push(() => actions.initializeStore(dataID, relations));
       if (destroyOnUnmount) {
         onUnmount.push(() => actions.destructStore());
       }
