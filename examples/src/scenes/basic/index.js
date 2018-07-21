@@ -12,6 +12,7 @@ const basicScreen = (props) => {
     rr_data: {
       USERS: {
         data,
+
       } = {}
     } = {},
     rr_actions: {
@@ -84,7 +85,8 @@ export default compose(
       dataKey: 'USERS',
       dataID: 'id',
       ID: ({ match: { params: { id } = {} } = {} }) => id,
-      onIdUpdated: (prevId, newId) => { history.push(`/edit/${newId}`) }
+      onIdUpdated: (prevId, newId) => { history.push(`/edit/${newId}`) },
+      loadOnMount: true,
     },
     (state, { USERS: { data } = {} }) =>
       ({ initialValues: data && !data.length && Object.keys(data).length ? data : undefined }),

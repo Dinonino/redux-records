@@ -3,6 +3,7 @@ import { reducerFactory, REDUX_PATHS, ApiMiddleware } from 'redux-records';
 import { reducer as formReducer } from 'redux-form';
 
 const dataReducer = reducerFactory();
+const delay = (time) => (result) => new Promise(resolve => setTimeout(() => resolve(result), time));
 const defaultOptions = {
   headers: {
     Accept: 'application/json',
@@ -11,23 +12,24 @@ const defaultOptions = {
   method: 'POST',
 };
 const baseUrl = 'http://localhost:3004';
+const delayTime = 2000;
 const entityPoint = entity => ({
   delete: ({ id }) => fetch(`${baseUrl}/${entity}/${id}`, {
     ...defaultOptions,
     method: 'DELETE',
-  }),
+  }).then(delay(delayTime)),
   update: ({ id, ...entityBody }) => {
     if (id) {
       return fetch(`${baseUrl}/${entity}/${id}`, {
         ...defaultOptions,
         body: JSON.stringify(entityBody),
         method: 'PUT',
-      }).then(response => response.json());
+      }).then(response => response.json()).then(delay(delayTime));
     }
     return fetch(`${baseUrl}/${entity}`, {
       ...defaultOptions,
       body: JSON.stringify(entityBody),
-    }).then(response => response.json());
+    }).then(response => response.json()).then(delay(delayTime));
   },
   load: (params) => {
     const query = Object.keys(params)
@@ -36,7 +38,7 @@ const entityPoint = entity => ({
     return fetch(`${baseUrl}/${entity}?${query}`, {
       ...defaultOptions,
       method: 'GET',
-    }).then(response => response.json());
+    }).then(response => response.json()).then(delay(delayTime));
   },
 });
 

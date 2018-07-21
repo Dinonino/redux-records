@@ -41,24 +41,63 @@ const entityMapStateToProps = (state, ownProps, {
     ...props,
   };
 };
+const relationsConfig = {
+  loadOnMount: true,
+  recordsPropertyName: '',
+};
+const defaultConfig = {
+  storeKey: STORE_KEY,
+  dataID: 'id',
+  destroyOnUnmount: false,
+  initializeOnMount: true,
+  loadOnMount: false,
+  relations: {},
+};
+
+const calculateRelations = (relations) => {
+  const calcRelations = {};
+  if (relations &&
+    typeof config === 'object' &&
+    relations.constructor === Object) {
+    Object.entries(relations).forEach(([key, value]) => {
+      if (typeof value === 'string' || value instanceof String) {
+        calcRelations[key] = { ...relationsConfig, foreignRecordKey: value };
+      } else if (value && typeof value === 'object' && value.constructor === Object) {
+        calcRelations[key] = { ...relationsConfig, ...value };
+      }
+    });
+  }
+  return calcRelations;
+};
+
 
 const calculateConfig = (config) => {
   const calcConfig = [];
   if (typeof config === 'string' || config instanceof String) {
     calcConfig.push({
-      storeKey: STORE_KEY, dataID: 'id', dataKey: config, destroyOnUnmount: false, relations: {},
+      ...defaultConfig,
+      dataKey: config,
     });
   } else if (config && typeof config === 'object' && config.constructor === Object) {
-    calcConfig.push(config);
+    calcConfig.push({
+      ...defaultConfig,
+      ...config,
+      relations: calculateRelations(config.relations),
+    });
   } else if (config && typeof config === 'object' && config.constructor === Array) {
     for (let index = 0; index < config.length; index += 1) {
       const element = config[index];
       if (typeof element === 'string' || element instanceof String) {
         calcConfig.push({
-          storeKey: STORE_KEY, dataID: 'id', dataKey: element, destroyOnUnmount: false, relations: {},
+          ...defaultConfig,
+          dataKey: element,
         });
       } else if (element && typeof element === 'object' && element.constructor === Object) {
-        calcConfig.push(element);
+        calcConfig.push({
+          ...defaultConfig,
+          ...element,
+          relations: calculateRelations(element.relations),
+        });
       } else {
         throw new Error('Invalid container configuration');
       }
@@ -68,6 +107,7 @@ const calculateConfig = (config) => {
   }
   return calcConfig;
 };
+
 
 const dataContainer = (connect, config, mapStateToProps) => {
   const configurations = calculateConfig(config);
@@ -97,10 +137,15 @@ const dataContainer = (connect, config, mapStateToProps) => {
     const onUnmount = [];
     for (let index = 0; index < configurations.length; index += 1) {
       const {
-        dataKey, onIdUpdated, dataID, destroyOnUnmount, relations,
+        dataKey, onIdUpdated, dataID, destroyOnUnmount, relations, initializeOnMount, loadOnMount,
       } = configurations[index];
       const actions = bindActionCreators(actionsFactory(dataKey), dispatch);
-      onMount.push(() => actions.initializeStore(dataID, relations));
+      if (initializeOnMount) {
+        onMount.push(() => actions.initializeStore(dataID, relations));
+      }
+      if (loadOnMount) {
+        onMount.push(() => actions.loadAction());
+      }
       if (destroyOnUnmount) {
         onUnmount.push(() => actions.destructStore());
       }

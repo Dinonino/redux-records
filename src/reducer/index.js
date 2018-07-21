@@ -97,7 +97,7 @@ const reducerFactory = ({ ID, dataID, relations }) => {
             };
           }
         });
-        globalState.STATE = ENTITY_STATUS.SYNCED;
+        globalState.STATUS = ENTITY_STATUS.SYNCED;
         globalState.SYNC_MSG = '';
         return newState;
       case CONSTANTS.UPDATE:
