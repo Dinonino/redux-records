@@ -25,7 +25,7 @@ const listScreen = (props) => {
   return (
     <div>
       <Loader size='large' active={STATUS === 'SYNCING'} inline='centered'>Loading</Loader>
-      <Table attached>
+      <Table>
         <Table.Header>
           <Table.HeaderCell>First Name</Table.HeaderCell>
           <Table.HeaderCell>Last Name</Table.HeaderCell>
@@ -45,7 +45,7 @@ const listScreen = (props) => {
               </Table.Row>))}
         </Table.Body>
       </Table>
-      <Button onClick={() => loadAction()}>Load Users</Button>
+      <Button primary onClick={() => loadAction()}>Load Users</Button>
     </div>
   );
 };
