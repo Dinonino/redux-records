@@ -1,4 +1,5 @@
-# Redux Records
+# <a href='https://github.com/ivanvarga/redux-records'><img src="https://raw.githubusercontent.com/ivanvarga/redux-records/master/examples/src/RR_logo-color.svg?sanitize=true" height="60"/></a>
+
 Lightweight yet powerful redux solution for data management that makes reduces boilerplate code necessary for data manipulation.
 ## Installation
 ```console
@@ -51,7 +52,7 @@ This will insert Users data and actions for loading, editing, creating and delet
 There multiple ways to initialize data container:
 ```js
  const arrayConfigComponent = dataContainer(['USERS','COMMENTS'])(presentationComponent);
- 
+
  const objectConfigComponent = dataContainer({ 
    storeKey: 'RRECORDS',
    dataID: 'id',
