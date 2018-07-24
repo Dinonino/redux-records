@@ -2,6 +2,7 @@
   "name": "redux-records",
   "version": "0.0.1",
   "description": "Lightweight yet powerful redux solution for data management",
+  "homepage": "https://ivanvarga.github.io/redux-records/",
   "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

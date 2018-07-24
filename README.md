@@ -1,6 +1,6 @@
-# <a href='https://github.com/ivanvarga/redux-records'><img src="https://raw.githubusercontent.com/ivanvarga/redux-records/master/examples/src/RR_logo-color.svg?sanitize=true" height="60"/></a>
+# <a href='https://ivanvarga.github.io/redux-records/'><img src="https://raw.githubusercontent.com/ivanvarga/redux-records/master/examples/src/RR_logo-color.svg?sanitize=true" height="60"/></a>
 
-Lightweight yet powerful redux solution for data management that makes reduces boilerplate code necessary for data manipulation.
+Lightweight yet powerful redux solution for data management that reduces boilerplate code necessary for data manipulation.
 ## Installation
 ```console
 npm install redux-records

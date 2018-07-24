@@ -11,7 +11,8 @@ const defaultOptions = {
   },
   method: 'POST',
 };
-const baseUrl = 'http://localhost:3004';
+const baseUrl = process.env.REACT_APP_API_URI;
+console.log(baseUrl);
 const delayTime = 2000;
 const entityPoint = entity => ({
   delete: ({ id }) => fetch(`${baseUrl}/${entity}/${id}`, {

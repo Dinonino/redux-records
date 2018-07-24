@@ -1,12 +1,12 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { createBrowserHistory as createHistory } from 'history';
-import { Router, Route, Link, Switch } from 'react-router-dom';
+import { Router, Route, Link, Switch, Redirect } from 'react-router-dom';
 import { Container, Image, Menu, Grid } from 'semantic-ui-react';
 import Basic from './scenes/basic';
 import ListComp from './scenes/basic/list';
 import Advanced from './scenes/advanced';
-import logo from './RR_logo-color.svg';
+import logo from './RR_logo-white.svg';
 import './App.css';
 import store from './store';
 
@@ -15,30 +15,49 @@ const App = () => (
   <Provider store={store}>
 
     <Router history={history}>
-     <div>
-            <Menu fixed='left' vertical inverted>
-              <Container >
-              <Menu.Item as="a" header>
-              <Image
-                size="small"
-                src={logo}
-                style={{ marginRight: '8em' }}
-              />
-            </Menu.Item>
-                <Menu.Item as="div"><Link to="/edit">New User</Link></Menu.Item>
-                <Menu.Item as="div"><Link to="/list">List</Link></Menu.Item>
-                <Menu.Item as="div"><Link to="/advanced">Advanced</Link></Menu.Item>
-              </Container>
-            </Menu>
+      <div>
+        <Menu fixed='left' vertical inverted>
 
-            <Container text style={{ marginTop: '3em' }}>
-              <Switch>
-                <Route exact path="/list" component={ListComp} />
-                <Route exact path="/advanced" component={Advanced} />
-                <Route exact path="/edit/:id?" component={Basic} />
-              </Switch>
-            </Container>
-         </div>
+          <Menu.Item as="a" header>
+            <Image
+              size="small"
+              src={logo}
+              style={{ marginRight: '8em' }}
+            />
+          </Menu.Item>
+          <Menu.Item>
+            <Menu.Header>Installation</Menu.Header>
+            <Menu.Menu>
+            </Menu.Menu>
+          </Menu.Item>
+          <Menu.Item>
+            <Menu.Header>Getting Started </Menu.Header>
+            <Menu.Menu>
+            </Menu.Menu>
+          </Menu.Item>
+          <Menu.Item>
+            <Menu.Header>Basic</Menu.Header>
+            <Menu.Menu>
+              <Menu.Item as="div"><Link to="/redux-records/edit">New User</Link></Menu.Item>
+              <Menu.Item as="div"><Link to="/redux-records/list">List</Link></Menu.Item>
+            </Menu.Menu>
+          </Menu.Item>
+          <Menu.Item>
+            <Menu.Header>Advanced</Menu.Header>
+            <Menu.Menu>
+            </Menu.Menu>
+          </Menu.Item>
+        </Menu>
+
+        <Container text style={{ marginTop: '3em' }}>
+          <Switch>
+            <Route exact path="/redux-records/list" component={ListComp} />
+            <Route exact path="/redux-records/advanced" component={Advanced} />
+            <Route exact path="/redux-records/edit/:id?" component={Basic} />
+            <Redirect from="/" to="/redux-records/list" />
+          </Switch>
+        </Container>
+      </div>
     </Router>
   </Provider >
 );
