@@ -6,6 +6,20 @@ Lightweight yet powerful redux solution for data management that reduces boilerp
 npm install redux-records
 ```
 Library has redux as peer dependency, so make sure you have it installed.
+
+All you need to do next is inject records reducer:
+```js
+import { createStore, combineReducers } from 'redux';
+import { reducerFactory, REDUX_PATHS } from 'redux-records';
+
+const store = createStore(
+  combineReducers({
+    [REDUX_PATHS.STORE_KEY]: reducerFactory(),
+  }),
+  enhancer,
+);
+export default store;
+```
 ## Getting started
 ### Container
 In case you are using library in react project you might wanna define react container for ease of use:
