@@ -124,7 +124,7 @@ const dataContainer = (connect, config, mapStateToProps) => {
     }
     if (mapStateToProps) {
       return {
-        data,
+        rr_data: data,
         ...mapStateToProps(state, data),
       };
     }

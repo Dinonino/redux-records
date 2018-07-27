@@ -124,10 +124,8 @@ const reducerFactory = ({ ID, dataID, relations }) => {
             entityState.ACTIONS.length > (entityState.HISTORY_INDEX + 1)) {
             entityState.ACTIONS.splice(entityState.HISTORY_INDEX + 1);
           }
-          if (entityState.ACTIONS.length) {
-            entityState.ACTIONS[entityState.HISTORY_INDEX].SNAPSHOT = entity;
-          }
-          entityState.ACTIONS.push({ ACTION: ACTION.UPDATE, PAYLOAD: payload });
+
+          entityState.ACTIONS.push({ ACTION: ACTION.UPDATE, PAYLOAD: payload, SNAPSHOT: entity });
           entityState.HISTORY_INDEX = entityState.ACTIONS.length - 1;
         }
         return newState;
@@ -159,16 +157,23 @@ const reducerFactory = ({ ID, dataID, relations }) => {
         if (entityState.ACTIONS.length &&
           entityState.ACTIONS.length > (entityState.HISTORY_INDEX + 1)) {
           newState[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity !== el);
-          entityState.HISTORY_INDEX += 1;
-          newState[STORE_PATH.DATA].push(entityState.ACTIONS[entityState.HISTORY_INDEX].SNAPSHOT);
+
+          newState[STORE_PATH.DATA].push(entityState.ACTIONS[entityState.HISTORY_INDEX + 1].SNAPSHOT);
+          if (entityState.ACTIONS.length > (entityState.HISTORY_INDEX + 2)) {
+            entityState.HISTORY_INDEX += 1;
+          }
         }
         return newState;
       case CONSTANTS.UNDO:
-        if (entityState.ACTIONS.length && entityState.HISTORY_INDEX > 0) {
+        if (entityState.ACTIONS.length && entityState.HISTORY_INDEX >= 0) {
           newState[STORE_PATH.DATA] = state[STORE_PATH.DATA].filter(el => entity !== el);
-          entityState.ACTIONS[entityState.HISTORY_INDEX].SNAPSHOT = entity;
-          entityState.HISTORY_INDEX -= 1;
           newState[STORE_PATH.DATA].push(entityState.ACTIONS[entityState.HISTORY_INDEX].SNAPSHOT);
+          if (!entityState.ACTIONS[entityState.HISTORY_INDEX + 1]) {
+            entityState.ACTIONS[entityState.HISTORY_INDEX + 1] = { SNAPSHOT: entity };
+          }
+          if (entityState.HISTORY_INDEX > 0) {
+            entityState.HISTORY_INDEX -= 1;
+          }
         }
         return newState;
       case CONSTANTS.DISCARD:
