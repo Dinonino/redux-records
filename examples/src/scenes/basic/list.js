@@ -89,7 +89,7 @@ const listScreen = (props) => {
           <Table.Row>
             <Table.HeaderCell>Name</Table.HeaderCell>
             <Table.HeaderCell>Username</Table.HeaderCell>
-            <Table.HeaderCell>&nbsp;</Table.HeaderCell>
+            <Table.HeaderCell> </Table.HeaderCell>
           </Table.Row>
         </Table.Header>
         <Table.Body>
