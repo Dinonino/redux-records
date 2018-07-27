@@ -23,6 +23,7 @@ const ApiWrapperFactory = (options, dispatch) =>
             result => result,
             (error) => {
               dispatch(actionFailed(error));
+              throw error;
             },
           ).then((resolvedResponse) => {
             dispatch(actionSucceeded(resolvedResponse));

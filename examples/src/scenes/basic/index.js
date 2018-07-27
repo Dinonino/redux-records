@@ -120,7 +120,9 @@ const basicScreen = (props) => {
     rr_data: {
       USERS: {
         data,
-
+        dataState: {
+          STATUS,
+        } = {},
       } = {}
     } = {},
     rr_actions: {
@@ -134,7 +136,7 @@ const basicScreen = (props) => {
     } = {},
   } = props;
   return (
-<Container>
+    <Container>
       <Menu attached="top">
 
         <Menu.Item
@@ -192,7 +194,7 @@ const basicScreen = (props) => {
         </Form.Field>
       </Form>
       <CodeDoc code={code} />
-      </Container>
+    </Container>
   );
 };
 
