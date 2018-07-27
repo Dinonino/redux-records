@@ -4,3 +4,10 @@ node_modules
 lib
 
 /examples/db.json
+/examples/src/assets/semantic/dist/*
+/examples/src/assets/semantic/gulpfile.js
+/examples/src/assets/semantic/src/definitions
+/examples/src/assets/semantic/src/semantic.less
+/examples/src/assets/semantic/src/theme.less
+/examples/src/assets/semantic/src/themes
+/examples/src/assets/semantic/tasks

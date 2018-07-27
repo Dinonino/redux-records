@@ -47,7 +47,7 @@
     "redux-form": "^7.3.0",
     "redux-records": "file:../",
     "resolve": "1.6.0",
-    "semantic-ui-css": "^2.3.1",
+    "semantic-ui": "^2.3.3",
     "semantic-ui-react": "^0.80.0",
     "style-loader": "0.19.0",
     "sw-precache-webpack-plugin": "0.11.4",
@@ -58,8 +58,11 @@
     "whatwg-fetch": "2.0.3"
   },
   "scripts": {
-    "start": "npm run start:rest & npm run start:frontend",
+    "start": "npm run start:rest & npm run watch:css & npm run start:frontend",
     "start:frontend": "node scripts/start.js",
+    "watch:css":"gulp watch --cwd src/assets/semantic",
+    "build:css":"gulp build --cwd src/assets/semantic",
+    "clean:css":"gulp clean --cwd src/assets/semantic",
     "build": "node scripts/build.js",
     "test": "node scripts/test.js --env=jsdom",
     "start:rest": "npm run refresh_db & json-server --watch db.json --port 3004",
