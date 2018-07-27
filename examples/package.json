@@ -63,7 +63,7 @@
     "watch:css":"gulp watch --cwd src/assets/semantic",
     "build:css":"gulp build --cwd src/assets/semantic",
     "clean:css":"gulp clean --cwd src/assets/semantic",
-    "build": "node scripts/build.js",
+    "build": "npm run build:css & node scripts/build.js",
     "test": "node scripts/test.js --env=jsdom",
     "start:rest": "npm run refresh_db & json-server --watch db.json --port 3004",
     "refresh_db": "cp -rf ./db_template.json ./db.json",
