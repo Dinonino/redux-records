@@ -1,6 +1,6 @@
 import React from 'react';
 import { compose } from 'redux';
-import { Table, Button, Loader } from 'semantic-ui-react';
+import { Table, Button, Loader, Container } from 'semantic-ui-react';
 import { Link, withRouter } from 'react-router-dom';
 import dataContainer from '../../components/datacontainer';
 import CodeDoc from '../../components/codeDoc';
@@ -83,9 +83,9 @@ const listScreen = (props) => {
     } = {},
   } = props;
   return (
-    <div>
+    <Container>
       <Loader size='large' active={STATUS === 'SYNCING'} inline='centered'>Loading</Loader>
-      <Table>
+      <Table celled>
         <Table.Header>
           <Table.HeaderCell>Name</Table.HeaderCell>
           <Table.HeaderCell>Username</Table.HeaderCell>
@@ -107,7 +107,7 @@ const listScreen = (props) => {
       </Table>
       <Button primary onClick={() => loadAction()}>Load Users</Button>
       <CodeDoc code={code} />
-    </div>
+    </Container>
   );
 };
 

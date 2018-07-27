@@ -1,7 +1,7 @@
 import React from 'react';
 import { compose } from 'redux';
 import { Field, FormSection, reduxForm } from 'redux-form';
-import { Button, Form, Menu, Divider } from 'semantic-ui-react';
+import { Button, Form, Menu, Divider, Container } from 'semantic-ui-react';
 import { withRouter } from 'react-router-dom';
 
 import { history } from '../../App';
@@ -134,7 +134,7 @@ const basicScreen = (props) => {
     } = {},
   } = props;
   return (
-    <div>
+<Container>
       <Menu attached="top">
 
         <Menu.Item
@@ -192,7 +192,7 @@ const basicScreen = (props) => {
         </Form.Field>
       </Form>
       <CodeDoc code={code} />
-    </div>
+      </Container>
   );
 };
 
